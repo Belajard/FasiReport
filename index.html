@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FasiReport — Sistem Pelaporan Kondisi Fasilitas Perusahaan</title>
+    <link rel="icon" href="./assets/img/logo.png" type="image/png" sizes="48x48">
+    <meta name="description" content="Aplikasi Pelaporan Kerusakan Fasilitas Perusahaan berbasis web dengan alur penanganan terstruktur, tracking status riwayat, dan hak akses Karyawan, Admin & Teknisi." />
+    <meta property="og:title" content="FasiReport — Aplikasi Pelaporan Kerusakan Fasilitas" />
+    <meta property="og:description" content="Sistem Pelaporan Kondisi Fasilitas Perusahaan digital dengan pelacakan berurutan Dilaporkan, Ditugaskan, Diproses, Diperbaiki, hingga Selesai." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 antialiased font-sans transition-colors">
+    <div id="root">
+      <!-- Layar pembuka saat aplikasi dimuat; otomatis digantikan saat React ter-mount -->
+      <div id="loading-fallback" style="min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; background-color: #f8fafc; color: #0f172a; padding: 24px;">
+        <div style="text-align: center; max-width: 440px; background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
+          <div style="width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite;"></div>
+          <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 8px 0; color: #0f172a; letter-spacing: -0.02em;">Memuat FasiReport...</h2>
+          <p style="font-size: 0.875rem; color: #64748b; margin: 0; line-height: 1.5;">Menghubungkan ke server dan basis data fasilitas.</p>
+          <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.jsx"></script>
+
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "FasiReport",
+  "description": "Sistem Pelaporan Kondisi Fasilitas Perusahaan berbasis web dengan alur penanganan terstruktur, tracking status riwayat, dan hak akses Karyawan \u0026 Admin.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
