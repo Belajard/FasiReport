@@ -179,7 +179,7 @@ export const Sidebar = ({
     /* Mobile Backdrop */
   }
       {isMobileOpen && <div
-    className="md:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs"
+    className="anim-overlay md:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs"
     onClick={() => setIsMobileOpen(false)}
   />}
 

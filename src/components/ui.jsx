@@ -18,7 +18,7 @@ export const SectionHeader = ({ eyebrow, title, subtitle, action }) => <div clas
     {action}
   </div>;
 
-export const ModalShell = ({ title, subtitle, onClose, children, maxW = "max-w-lg" }) => <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+export const ModalShell = ({ title, subtitle, onClose, children, maxW = "max-w-lg" }) => <div className="anim-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
     <div className={`relative w-full ${maxW} bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-6 transition-colors`}>
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
         <div>

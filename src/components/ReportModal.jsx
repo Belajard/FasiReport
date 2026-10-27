@@ -39,7 +39,7 @@ export const ReportModal = ({
     hour: "2-digit",
     minute: "2-digit"
   });
-  return <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
+  return <div className="anim-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
       <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-8 animate-in fade-in zoom-in-95 transition-colors">
         
         {
@@ -251,7 +251,7 @@ export const ReportModal = ({
     /* Photo Zoom Modal */
   }
       {selectedPhotoZoom && <div
-    className="fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm cursor-pointer"
+    className="anim-overlay fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm cursor-pointer"
     onClick={() => setSelectedPhotoZoom(null)}
   >
           <div className="relative max-w-4xl max-h-[90vh]">

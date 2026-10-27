@@ -40,7 +40,7 @@ export const LoginPage = () => {
     }
   };
   return <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 transition-colors">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md anim-enter">
         
         {
     /* Brand Header */
@@ -84,30 +84,30 @@ export const LoginPage = () => {
             <button
     type="button"
     onClick={() => handleRoleChange("employee")}
-    className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "employee" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
+    className={`flex-1 min-w-0 py-2.5 px-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 flex items-center justify-center gap-1.5 ${selectedRole === "employee" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
   >
               <UserCheck className="w-3.5 h-3.5" />
-              <span>Masuk Karyawan</span>
+              <span>Karyawan</span>
             </button>
             <button
     type="button"
     onClick={() => handleRoleChange("admin")}
-    className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "admin" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
+    className={`flex-1 min-w-0 py-2.5 px-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 flex items-center justify-center gap-1.5 ${selectedRole === "admin" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
   >
               <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Masuk Admin</span>
+              <span>Admin</span>
             </button>
             <button
     type="button"
     onClick={() => handleRoleChange("technician")}
-    className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "technician" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
+    className={`flex-1 min-w-0 py-2.5 px-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 flex items-center justify-center gap-1.5 ${selectedRole === "technician" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
   >
               <Wrench className="w-3.5 h-3.5" />
-              <span>Masuk Teknisi</span>
+              <span>Teknisi</span>
             </button>
           </div>
 
-          <div className="mb-5 text-center">
+          <div key={selectedRole + isRegister} className="mb-5 text-center anim-enter">
             <h2 className="text-base font-extrabold text-slate-800 dark:text-white">
               {isRegister ? "Daftar Akun Karyawan" : selectedRole === "admin" ? "Login Administrator" : selectedRole === "technician" ? "Login Teknisi" : "Login Karyawan"}
             </h2>
@@ -116,7 +116,7 @@ export const LoginPage = () => {
             </p>
           </div>
 
-          {errorMsg && <div className="mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs text-rose-800 dark:text-rose-300 flex items-start gap-2">
+          {errorMsg && <div key={errorMsg} className="anim-shake mb-4 p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs text-rose-800 dark:text-rose-300 flex items-start gap-2">
               <span className="w-2 h-2 rounded-full bg-rose-600 shrink-0 mt-1" />
               <span>{errorMsg}</span>
             </div>}
