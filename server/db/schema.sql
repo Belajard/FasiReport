@@ -138,3 +138,26 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX IF NOT EXISTS idx_audit_created ON audit_logs(created_at DESC);
+
+-- Indeks untuk foreign key yang sering dipakai join/filter
+CREATE INDEX IF NOT EXISTS idx_reports_vendor ON reports(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_hist_changed_by ON report_histories(changed_by);
+CREATE INDEX IF NOT EXISTS idx_materials_report ON report_materials(report_id);
+CREATE INDEX IF NOT EXISTS idx_comments_user ON comments(user_id);
+CREATE INDEX IF NOT EXISTS idx_notif_report ON notifications(report_id);
+CREATE INDEX IF NOT EXISTS idx_maint_tech ON maintenance_schedules(technician_id);
+CREATE INDEX IF NOT EXISTS idx_maint_vendor ON maintenance_schedules(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_logs(user_id);
+
+-- Keamanan (penting di Supabase): akses data hanya lewat server API (koneksi Postgres langsung).
+-- RLS diaktifkan tanpa policy sehingga API publik Supabase (anon/authenticated) tidak dapat membaca/menulis tabel ini.
+ALTER TABLE users                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE facilities            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vendors               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE reports               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE report_histories      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE report_materials      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments              ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE maintenance_schedules ENABLE ROW LEVEL SECURITY;
+ALTER TABLE audit_logs            ENABLE ROW LEVEL SECURITY;

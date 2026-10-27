@@ -79,6 +79,18 @@ Buka http://localhost:3000.
 | `npm test` | Tes API (butuh database berisi seed) |
 | `npm run build` lalu `npm start` | Produksi: server melayani API dan hasil build dari satu port (4000) |
 
+## Database di Supabase
+
+Database cloud sudah dibuat di project Supabase `fasireport` (region Singapore) lengkap dengan skema, indeks, RLS, dan data demo.
+Untuk menghubungkan server:
+
+1. Supabase Dashboard > Project Settings > Database > Connection string (Session pooler).
+2. Salin ke `.env` sebagai `DATABASE_URL=...` (isi password database Anda). SSL aktif otomatis.
+3. `npm run build && npm start` — data kini tersimpan di Supabase.
+
+RLS aktif tanpa policy: tabel hanya dapat diakses lewat server API, bukan lewat API publik Supabase.
+Akun demo memakai password `password123`; ubah atau nonaktifkan sebelum dipakai di luar demo.
+
 ## Keamanan
 
 - Kata sandi di-hash (bcrypt); sesi memakai JWT; akun nonaktif langsung ditolak.

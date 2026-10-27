@@ -6,7 +6,12 @@ pg.types.setTypeParser(1082, (v) => v);
 // NUMERIC -> number
 pg.types.setTypeParser(1700, (v) => (v === null ? null : Number(v)));
 
-export const pool = new pg.Pool({ connectionString: config.databaseUrl, max: 10 });
+export const pool = new pg.Pool({
+  connectionString: config.databaseUrl,
+  max: 10,
+  // Supabase mewajibkan koneksi terenkripsi
+  ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined,
+});
 
 export const query = (text, params) => pool.query(text, params);
 
