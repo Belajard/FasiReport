@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { Lock, Mail, ArrowRight, ShieldCheck, UserCheck } from "lucide-react";
+import { Lock, Mail, ArrowRight, ShieldCheck, UserCheck, Wrench, User } from "lucide-react";
 export const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, register } = useAuth();
+  const [isRegister, setIsRegister] = useState(false);
+  const [name, setName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [selectedRole, setSelectedRole] = useState("employee");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -10,6 +13,7 @@ export const LoginPage = () => {
   const [errorMsg, setErrorMsg] = useState(null);
   const handleRoleChange = (role) => {
     setSelectedRole(role);
+    if (role !== "employee") setIsRegister(false);
     setErrorMsg(null);
   };
   const handleSubmit = async (e) => {
@@ -21,7 +25,14 @@ export const LoginPage = () => {
     }
     try {
       setIsLoading(true);
-      await login(email, password);
+      if (isRegister) {
+        if (name.trim().length < 2) throw new Error("Nama lengkap minimal 2 karakter.");
+        if (password.length < 8) throw new Error("Kata sandi minimal 8 karakter.");
+        if (password !== confirmPassword) throw new Error("Konfirmasi kata sandi tidak sama.");
+        await register(name, email, password);
+      } else {
+        await login(email, password, selectedRole);
+      }
     } catch (err) {
       setErrorMsg(err.message || "Gagal masuk. Periksa kembali email dan kata sandi Anda.");
     } finally {
@@ -73,7 +84,7 @@ export const LoginPage = () => {
             <button
     type="button"
     onClick={() => handleRoleChange("employee")}
-    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "employee" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
+    className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "employee" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
   >
               <UserCheck className="w-3.5 h-3.5" />
               <span>Masuk Karyawan</span>
@@ -81,19 +92,27 @@ export const LoginPage = () => {
             <button
     type="button"
     onClick={() => handleRoleChange("admin")}
-    className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "admin" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
+    className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "admin" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
   >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Masuk Admin</span>
+            </button>
+            <button
+    type="button"
+    onClick={() => handleRoleChange("technician")}
+    className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${selectedRole === "technician" ? "bg-white dark:bg-slate-900 text-teal-800 dark:text-teal-400 shadow-xs" : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"}`}
+  >
+              <Wrench className="w-3.5 h-3.5" />
+              <span>Masuk Teknisi</span>
             </button>
           </div>
 
           <div className="mb-5 text-center">
             <h2 className="text-base font-extrabold text-slate-800 dark:text-white">
-              {selectedRole === "admin" ? "Login Administrator" : "Login Karyawan"}
+              {isRegister ? "Daftar Akun Karyawan" : selectedRole === "admin" ? "Login Administrator" : selectedRole === "technician" ? "Login Teknisi" : "Login Karyawan"}
             </h2>
             <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">
-              {selectedRole === "admin" ? "Gunakan akun administrator untuk memantau fasilitas dan tiket aduan." : "Masuk dengan akun karyawan untuk membuat dan memantau aduan Anda."}
+              {isRegister ? "Buat akun karyawan untuk mulai melaporkan kerusakan fasilitas." : selectedRole === "admin" ? "Gunakan akun administrator untuk memantau fasilitas dan tiket aduan." : selectedRole === "technician" ? "Masuk dengan akun teknisi untuk menerima tugas dan memperbarui hasil perbaikan." : "Masuk dengan akun karyawan untuk membuat dan memantau aduan Anda."}
             </p>
           </div>
 
@@ -103,6 +122,23 @@ export const LoginPage = () => {
             </div>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {isRegister && <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Nama Lengkap
+              </label>
+              <div className="relative">
+                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Nama sesuai identitas karyawan"
+                  className="w-full pl-10 pr-3 py-2.5 text-xs border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-colors bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+            </div>}
+
             <div>
               <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                 Alamat Email
@@ -113,7 +149,7 @@ export const LoginPage = () => {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder={selectedRole === "admin" ? "admin.test@example.com" : "karyawan.test@example.com"}
+                  placeholder={selectedRole === "admin" ? "admin.test@example.com" : selectedRole === "technician" ? "teknisi.test@example.com" : "karyawan.test@example.com"}
                   className="w-full pl-10 pr-3 py-2.5 text-xs border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-colors bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   required
                 />
@@ -137,15 +173,43 @@ export const LoginPage = () => {
               </div>
             </div>
 
+            {isRegister && <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                Konfirmasi Kata Sandi
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="Ulangi kata sandi..."
+                  className="w-full pl-10 pr-3 py-2.5 text-xs border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-600 focus:border-teal-600 transition-colors bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                  required
+                />
+              </div>
+            </div>}
+
             <button
     type="submit"
     disabled={isLoading}
     className="w-full py-3 px-4 text-xs font-bold text-white bg-teal-700 hover:bg-teal-800 rounded-xl shadow-md shadow-teal-900/10 flex items-center justify-center gap-2 transition-all active:scale-98 disabled:opacity-50 mt-2"
   >
-              <span>{isLoading ? "Memproses..." : "Masuk ke Sistem"}</span>
+              <span>{isLoading ? "Memproses..." : isRegister ? "Daftar Sekarang" : "Masuk ke Sistem"}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
+
+          {selectedRole === "employee" && <p className="text-center text-xs text-slate-500 dark:text-slate-400 mt-5">
+            {isRegister ? "Sudah punya akun?" : "Belum punya akun?"}{" "}
+            <button
+              type="button"
+              onClick={() => { setIsRegister(!isRegister); setErrorMsg(null); }}
+              className="font-bold text-teal-700 dark:text-teal-400 hover:underline"
+            >
+              {isRegister ? "Masuk di sini" : "Daftar di sini"}
+            </button>
+          </p>}
 
         </div>
 

@@ -1,11 +1,12 @@
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { Sun, Moon } from "lucide-react";
-export const TopBar = ({ title, badge = "FASIREPORT" }) => {
+import { NotificationBell } from "./NotificationBell";
+import { ROLE_LABEL } from "../types";
+export const TopBar = ({ title, badge = "FASIREPORT", onOpenReport }) => {
   const { user } = useAuth();
   const { theme, toggleTheme } = useTheme();
   if (!user) return null;
-  const isAdmin = user.role === "admin";
   const initial = user.name.charAt(0).toUpperCase();
   return <header className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 px-5 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-10 transition-colors">
       {
@@ -24,6 +25,8 @@ export const TopBar = ({ title, badge = "FASIREPORT" }) => {
     /* Right side: Dark Mode Toggle & User Profile */
   }
       <div className="flex items-center gap-3">
+        <NotificationBell onOpenReport={onOpenReport} />
+
         {
     /* Dark Theme Toggle Button */
   }
@@ -50,7 +53,7 @@ export const TopBar = ({ title, badge = "FASIREPORT" }) => {
               {user.name}
             </div>
             <div className="text-[10px] font-medium text-slate-400 dark:text-slate-400 capitalize">
-              {isAdmin ? "Administrator" : "Karyawan"}
+              {user.role === "admin" ? "Administrator" : ROLE_LABEL[user.role]}
             </div>
           </div>
         </div>

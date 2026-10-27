@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FasiReport — Sistem Pelaporan Kondisi Fasilitas Perusahaan</title>
     <link rel="icon" href="./assets/img/logo.png" type="image/png" sizes="48x48">
-    <meta name="description" content="Aplikasi Pelaporan Kerusakan Fasilitas Perusahaan berbasis web dengan alur penanganan terstruktur, tracking status riwayat, dan hak akses Karyawan & Admin." />
+    <meta name="description" content="Aplikasi Pelaporan Kerusakan Fasilitas Perusahaan berbasis web dengan alur penanganan terstruktur, tracking status riwayat, dan hak akses Karyawan, Admin & Teknisi." />
     <meta property="og:title" content="FasiReport — Aplikasi Pelaporan Kerusakan Fasilitas" />
-    <meta property="og:description" content="Sistem Pelaporan Kondisi Fasilitas Perusahaan digital dengan pelacakan berurutan Dilaporkan, Diproses, Diperbaiki, hingga Selesai." />
+    <meta property="og:description" content="Sistem Pelaporan Kondisi Fasilitas Perusahaan digital dengan pelacakan berurutan Dilaporkan, Ditugaskan, Diproses, Diperbaiki, hingga Selesai." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
 
@@ -23,52 +23,13 @@
         <div style="text-align: center; max-width: 440px; background: #ffffff; padding: 32px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0;">
           <div style="width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; margin: 0 auto 16px; animation: spin 0.8s linear infinite;"></div>
           <h2 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 8px 0; color: #0f172a; letter-spacing: -0.02em;">Memuat FasiReport...</h2>
-          <p style="font-size: 0.875rem; color: #64748b; margin: 0; line-height: 1.5;">Menyiapkan basis data fasilitas dan modul antarmuka.</p>
+          <p style="font-size: 0.875rem; color: #64748b; margin: 0; line-height: 1.5;">Menghubungkan ke server dan basis data fasilitas.</p>
           <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
         </div>
       </div>
     </div>
 
-    <!-- Mode 1: Vite Dev Server (digunakan saat pengembangan aktif di AI Studio / npm run dev) -->
     <script type="module" src="/src/main.jsx"></script>
 
-    <!-- Mode 2: Universal Fallback Loader (bekerja otomatis saat klik dua kali file://, VS Code Live Server, atau deploy GitHub Pages) -->
-    <script>
-      (function() {
-        var isLocalFile = window.location.protocol === 'file:';
-        var isGitHubPages = window.location.hostname.endsWith('github.io');
-        var isNotViteDev = isLocalFile || isGitHubPages || (window.location.port !== '3000' && !window.location.hostname.includes('run.app'));
-
-        function loadStandaloneBundle() {
-          if (window.__bundle_loaded__) return;
-          window.__bundle_loaded__ = true;
-          
-          var script = document.createElement('script');
-          script.src = './assets/app.js';
-          script.onerror = function() {
-            // Coba jalur alternatif jika berada di dalam folder tertentu
-            var altScript = document.createElement('script');
-            altScript.src = './dist/assets/app.js';
-            document.body.appendChild(altScript);
-          };
-          document.body.appendChild(script);
-        }
-
-        if (isNotViteDev) {
-          if (isLocalFile) {
-            // Pada protokol file://, eksekusi langsung bundle klasik (bebas CORS)
-            loadStandaloneBundle();
-          } else {
-            // Pada server statis (Live Server / GitHub Pages), tunggu sejenak untuk memastikan Vite dev tidak aktif
-            setTimeout(function() {
-              var fallbackElem = document.getElementById('loading-fallback');
-              if (fallbackElem) {
-                loadStandaloneBundle();
-              }
-            }, 100);
-          }
-        }
-      })();
-    </script>
   </body>
 </html>

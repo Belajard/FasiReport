@@ -7,18 +7,30 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState(null);
   useEffect(() => {
-    try {
-      const existingUser = dataService.getCurrentUser();
-      const existingToken = dataService.getToken();
-      if (existingUser && existingToken) {
-        setUser(existingUser);
-        setToken(existingToken);
+    let cancelled = false;
+    dataService.onUnauthorized = (msg) => {
+      dataService.clearSession();
+      setUser(null);
+      setToken(null);
+      showToast(msg || "Sesi berakhir. Silakan login kembali.", "error");
+    };
+    (async () => {
+      try {
+        const restored = await dataService.restoreSession();
+        if (!cancelled && restored) {
+          setUser(restored);
+          setToken(dataService.getToken());
+        }
+      } catch (err) {
+        console.warn("Gagal memulihkan sesi:", err);
+        if (!cancelled) showToast(err.message, "error");
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-    } catch (err) {
-      console.warn("Failed to restore session:", err);
-    } finally {
-      setIsLoading(false);
-    }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
   const showToast = (message, type = "info") => {
     setToast({ message, type });
@@ -26,9 +38,9 @@ export const AuthProvider = ({ children }) => {
       setToast((prev) => prev?.message === message ? null : prev);
     }, 4e3);
   };
-  const login = async (email, password) => {
+  const login = async (email, password, role) => {
     try {
-      const res = dataService.login(email, password);
+      const res = await dataService.login(email, password, role);
       setUser(res.user);
       setToken(res.token);
       showToast(`Selamat datang kembali, ${res.user.name}!`, "success");
@@ -37,6 +49,18 @@ export const AuthProvider = ({ children }) => {
       throw err;
     }
   };
+  const register = async (name, email, password) => {
+    try {
+      const res = await dataService.register(name, email, password);
+      setUser(res.user);
+      setToken(res.token);
+      showToast(`Akun berhasil dibuat. Selamat datang, ${res.user.name}!`, "success");
+    } catch (err) {
+      showToast(err.message || "Gagal mendaftar", "error");
+      throw err;
+    }
+  };
+  const refreshUser = () => setUser(dataService.getCurrentUser());
   const logout = () => {
     dataService.logout();
     setUser(null);
@@ -51,6 +75,8 @@ export const AuthProvider = ({ children }) => {
       toast,
       showToast,
       login,
+      register,
+      refreshUser,
       logout
     }}
   >

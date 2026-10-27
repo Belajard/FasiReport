@@ -6,6 +6,12 @@ import { PriorityBadge } from "../components/PriorityBadge";
 import { ReportModal } from "../components/ReportModal";
 import { FacilityModal } from "../components/FacilityModal";
 import { MaintenanceModal } from "../components/MaintenanceModal";
+import { Pagination, paginate } from "../components/Pagination";
+import { OverdueBadge } from "../components/OverdueBadge";
+import { DirectoryPage } from "./DirectoryPage";
+import { UsersPage } from "./UsersPage";
+import { AuditPage } from "./AuditPage";
+import { ReportDateFilter, inDateRange } from "../components/ReportDateFilter";
 import {
   Plus,
   Clock,
@@ -26,13 +32,17 @@ import {
   CalendarDays,
   BookOpenCheck,
   Trash2,
-  PhoneCall
+  PhoneCall,
+  UserCheck
 } from "lucide-react";
-export const AdminView = ({ currentTab, onSelectTab }) => {
+export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandled }) => {
   const { user, showToast } = useAuth();
   const [stats, setStats] = useState({
     totalReports: 0,
     reportedCount: 0,
+    assignedCount: 0,
+    rejectedCount: 0,
+    overdueCount: 0,
     processingCount: 0,
     repairedCount: 0,
     completedCount: 0,
@@ -40,6 +50,10 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
     priorityCounts: { low: 0, medium: 0, high: 0 }
   });
   const [reports, setReports] = useState([]);
+  const [page, setPage] = useState(1);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  const [period, setPeriod] = useState(dataService.statsPeriod);
   const [facilities, setFacilities] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -77,10 +91,18 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
     });
     return () => unsubscribe();
   }, [user]);
+  useEffect(() => {
+    if (!focusReportId) return;
+    const r = reports.find((x) => x.id === focusReportId);
+    if (r) {
+      setSelectedReport(r);
+      if (onFocusHandled) onFocusHandled();
+    }
+  }, [focusReportId, reports]);
   if (!user) return null;
-  const handleToggleFacility = (facilityId) => {
+  const handleToggleFacility = async (facilityId) => {
     try {
-      const updated = dataService.toggleFacilityStatus(facilityId, user);
+      const updated = await dataService.toggleFacilityStatus(facilityId);
       showToast(
         `Fasilitas '${updated.name}' kini berstatus ${updated.status === "active" ? "Aktif" : "Nonaktif"}.`,
         "success"
@@ -90,16 +112,20 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
       showToast(err.message || "Gagal mengubah status fasilitas.", "error");
     }
   };
-  const handleDeleteMaintenance = (id, name) => {
+  const handleDeleteMaintenance = async (id, name) => {
     if (window.confirm(`Hapus agenda servis rutin untuk '${name}'?`)) {
-      dataService.deleteMaintenanceSchedule(id);
-      showToast(`Jadwal servis '${name}' berhasil dihapus.`, "success");
-      loadData();
+      try {
+        await dataService.deleteMaintenanceSchedule(id);
+        showToast(`Jadwal servis '${name}' berhasil dihapus.`, "success");
+        loadData();
+      } catch (err) {
+        showToast(err.message || "Gagal menghapus jadwal.", "error");
+      }
     }
   };
-  const handleToggleMaintenanceStatus = (id) => {
+  const handleToggleMaintenanceStatus = async (id) => {
     try {
-      const updated = dataService.toggleMaintenanceStatus(id);
+      const updated = await dataService.toggleMaintenanceStatus(id);
       const label = updated.status === "done" ? "Selesai Dilakukan" : updated.status === "ongoing" ? "Sedang Berjalan" : "Mendatang";
       showToast(`Status servis '${updated.facility}' diubah: ${label}.`, "success");
       loadData();
@@ -119,18 +145,28 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
       showToast("Belum ada data laporan untuk diekspor.", "error");
       return;
     }
-    const headers = ["ID", "Fasilitas", "Lokasi", "Pelapor", "Prioritas", "Status", "Tanggal Lapor", "Deskripsi Kerusakan"];
-    const rows = reports.map((r) => [
+    const list = filteredReports.length ? filteredReports : reports;
+    const esc = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+    const headers = ["ID", "Fasilitas", "Kategori", "Lokasi", "Pelapor", "Prioritas", "Status", "Penanggung Jawab", "Tanggal Lapor", "Batas SLA", "Tanggal Selesai", "Terlambat", "Biaya (Rp)", "Deskripsi Kerusakan", "Ringkasan Perbaikan"];
+    const fmtDate = (d) => d ? new Date(d).toLocaleString("id-ID") : "";
+    const rows = list.map((r) => [
       r.id,
-      `"${(r.facility?.name || "").replace(/"/g, '""')}"`,
-      `"${(r.facility?.location || "").replace(/"/g, '""')}"`,
-      `"${(r.user?.name || "").replace(/"/g, '""')}"`,
+      esc(r.facility?.name),
+      esc(r.facility?.category),
+      esc(r.facility?.location),
+      esc(r.user?.name),
       r.priority,
       r.status,
-      `"${new Date(r.created_at).toLocaleDateString("id-ID")}"`,
-      `"${r.description.replace(/"/g, '""')}"`
+      esc(r.technician?.name || (r.vendor ? `${r.vendor.name} (vendor)` : "")),
+      esc(fmtDate(r.created_at)),
+      esc(fmtDate(r.due_at)),
+      esc(fmtDate(r.completed_at)),
+      r.is_overdue ? "Ya" : "Tidak",
+      Number(r.cost) || 0,
+      esc(r.description),
+      esc(r.repair_summary)
     ]);
-    const csvContent = [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const csvContent = ["\ufeff" + headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -145,13 +181,16 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
     const matchesSearch = (r.facility?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || (r.user?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || r.description.toLowerCase().includes(searchQuery.toLowerCase()) || r.id.toString().includes(searchQuery);
     const matchesStatus = statusFilter === "all" || r.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || r.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && inDateRange(r.created_at, dateFrom, dateTo);
   });
+  const periodDays = { "7d": 7, "30d": 30, "90d": 90 }[period];
+  const inPeriod = (r) => !periodDays || Date.now() - new Date(r.created_at).getTime() <= periodDays * 864e5;
+  useEffect(() => setPage(1), [searchQuery, statusFilter, priorityFilter, dateFrom, dateTo]);
   const dashboardFilteredReports = reports.filter((r) => {
     const matchesStatus = dashboardStatusFilter === "all" || r.status === dashboardStatusFilter;
     const matchesSearch = (r.facility?.name || "").toLowerCase().includes(dashboardSearchQuery.toLowerCase()) || (r.user?.name || "").toLowerCase().includes(dashboardSearchQuery.toLowerCase()) || r.description.toLowerCase().includes(dashboardSearchQuery.toLowerCase()) || r.id.toString().includes(dashboardSearchQuery);
     const matchesPriority = priorityFilter === "all" || r.priority === priorityFilter;
-    return matchesStatus && matchesSearch && matchesPriority;
+    return matchesStatus && matchesSearch && matchesPriority && inPeriod(r);
   });
   const total = stats.totalReports;
   const highCount = stats.priorityCounts.high;
@@ -165,7 +204,7 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
   const highLen = total > 0 ? highCount / total * CIRCLE_LENGTH : 0;
   const medLen = total > 0 ? medCount / total * CIRCLE_LENGTH : 0;
   const lowLen = total > 0 ? lowCount / total * CIRCLE_LENGTH : 0;
-  const urgentReportsCount = reports.filter((r) => r.priority === "high" && r.status !== "completed").length;
+  const urgentReportsCount = reports.filter((r) => r.priority === "high" && !["completed", "rejected"].includes(r.status)).length;
   return <div className="space-y-6">
       
       {
@@ -257,6 +296,30 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
               </button>
             </div>}
 
+          {(stats.overdueCount > 0 || stats.reportedCount > 0) && <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {stats.reportedCount > 0 && <button
+    onClick={() => { setStatusFilter("reported"); onSelectTab("all-reports"); }}
+    className="text-left bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-2xl p-4 flex items-center gap-3 hover:border-amber-400 transition-colors"
+  >
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0 border border-amber-200 dark:border-amber-800">
+                    <UserCheck className="w-5 h-5" />
+                  </div>
+                  <div className="text-xs text-amber-900 dark:text-amber-200">
+                    <div className="font-extrabold text-sm">Menunggu Verifikasi</div>
+                    <strong>{stats.reportedCount} laporan baru</strong> perlu diverifikasi dan ditugaskan ke teknisi.
+                  </div>
+                </button>}
+              {stats.overdueCount > 0 && <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-900/50 text-rose-700 dark:text-rose-300 flex items-center justify-center shrink-0 border border-rose-200 dark:border-rose-800">
+                    <Clock className="w-5 h-5" />
+                  </div>
+                  <div className="text-xs text-rose-900 dark:text-rose-200">
+                    <div className="font-extrabold text-sm">Melewati Batas Waktu (SLA)</div>
+                    <strong>{stats.overdueCount} tugas</strong> belum selesai melewati tenggat penanganan.
+                  </div>
+                </div>}
+            </div>}
+
           {
     /* Top 4 Interactive Workflow Metrics: No number prefixes, matching employee theme */
   }
@@ -271,6 +334,23 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                 </p>
               </div>
 
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-xl text-xs">
+                  <span className="text-[11px] text-slate-400 font-semibold">Periode:</span>
+                  <select
+    value={period}
+    onChange={async (e) => {
+      setPeriod(e.target.value);
+      try { await dataService.setStatsPeriod(e.target.value); } catch (err) { showToast(err.message, "error"); }
+    }}
+    className="bg-transparent text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none cursor-pointer"
+  >
+                    <option value="all" className="dark:bg-slate-800">Semua Waktu</option>
+                    <option value="7d" className="dark:bg-slate-800">7 Hari Terakhir</option>
+                    <option value="30d" className="dark:bg-slate-800">30 Hari Terakhir</option>
+                    <option value="90d" className="dark:bg-slate-800">90 Hari Terakhir</option>
+                  </select>
+                </div>
               {dashboardStatusFilter !== "all" && <button
     onClick={() => setDashboardStatusFilter("all")}
     className="px-2.5 py-1 text-xs font-bold text-teal-700 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/50 rounded-lg flex items-center gap-1 transition-colors"
@@ -278,9 +358,10 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                   <RotateCcw className="w-3 h-3" />
                   <span>Tampilkan Semua Status</span>
                 </button>}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               
               {
     /* Dilaporkan Card */
@@ -302,13 +383,45 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                     {stats.reportedCount}
                   </div>
                   <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-                    Menunggu tinjauan awal admin
+                    Menunggu verifikasi admin
                   </div>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
                   <span className="text-slate-500 dark:text-slate-400">Respons Awal</span>
                   <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                     <span>{dashboardStatusFilter === "reported" ? "Aktif Terfilter" : "Filter Tiket"}</span>
+                    <ArrowUpRight className="w-3 h-3" />
+                  </span>
+                </div>
+              </div>
+
+              {
+    /* Ditugaskan Card */
+  }
+              <div
+    onClick={() => handleWorkflowCardClick("assigned")}
+    className={`bg-white dark:bg-slate-900 rounded-2xl border p-5 shadow-xs transition-all cursor-pointer group text-left relative overflow-hidden ${dashboardStatusFilter === "assigned" ? "border-teal-500 ring-2 ring-teal-400/40 bg-teal-50/20 dark:bg-teal-950/20" : "border-slate-200/90 dark:border-slate-800 hover:border-teal-400 dark:hover:border-teal-500"}`}
+  >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                    Ditugaskan
+                  </span>
+                  <span className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950/50 text-teal-600 dark:text-teal-400 flex items-center justify-center border border-teal-200/50 dark:border-teal-800/40">
+                    <UserCheck className="w-4 h-4" />
+                  </span>
+                </div>
+                <div className="mt-3">
+                  <div className="text-3xl font-extrabold text-slate-900 dark:text-white tabular-nums tracking-tight">
+                    {stats.assignedCount}
+                  </div>
+                  <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                    Menunggu teknisi/vendor memulai
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
+                  <span className="text-slate-500 dark:text-slate-400">Penugasan</span>
+                  <span className="font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                    <span>{dashboardStatusFilter === "assigned" ? "Aktif Terfilter" : "Filter Tiket"}</span>
                     <ArrowUpRight className="w-3 h-3" />
                   </span>
                 </div>
@@ -334,7 +447,7 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                     {stats.processingCount}
                   </div>
                   <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-                    Sedang ditangani teknisi lapangan
+                    Sedang dikerjakan di lapangan
                   </div>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
@@ -366,11 +479,11 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                     {stats.repairedCount}
                   </div>
                   <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
-                    Perbaikan fisik selesai & diuji coba
+                    Menunggu konfirmasi pelapor
                   </div>
                 </div>
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-500 dark:text-slate-400">Verifikasi Teknis</span>
+                  <span className="text-slate-500 dark:text-slate-400">Konfirmasi</span>
                   <span className="font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                     <span>{dashboardStatusFilter === "repaired" ? "Aktif Terfilter" : "Filter Tiket"}</span>
                     <ArrowUpRight className="w-3 h-3" />
@@ -924,6 +1037,16 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                 </button>
 
                 <button
+    onClick={() => setStatusFilter("assigned")}
+    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${statusFilter === "assigned" ? "bg-teal-700 text-white shadow-xs" : "bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/40 border border-teal-200/50 dark:border-teal-800/50"}`}
+  >
+                  <span>Ditugaskan</span>
+                  <span className="w-4 h-4 rounded-full bg-white/20 dark:bg-black/20 text-[10px] flex items-center justify-center font-mono">
+                    {stats.assignedCount}
+                  </span>
+                </button>
+
+                <button
     onClick={() => setStatusFilter("processing")}
     className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${statusFilter === "processing" ? "bg-sky-600 text-white shadow-xs" : "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-400 hover:bg-sky-100 dark:hover:bg-sky-900/40 border border-sky-200/50 dark:border-sky-800/50"}`}
   >
@@ -950,6 +1073,16 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                   <span>Selesai</span>
                   <span className="w-4 h-4 rounded-full bg-white/20 dark:bg-black/20 text-[10px] flex items-center justify-center font-mono">
                     {stats.completedCount}
+                  </span>
+                </button>
+
+                <button
+    onClick={() => setStatusFilter("rejected")}
+    className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-1.5 ${statusFilter === "rejected" ? "bg-rose-600 text-white shadow-xs" : "bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 border border-rose-200/50 dark:border-rose-800/50"}`}
+  >
+                  <span>Ditolak</span>
+                  <span className="w-4 h-4 rounded-full bg-white/20 dark:bg-black/20 text-[10px] flex items-center justify-center font-mono">
+                    {stats.rejectedCount}
                   </span>
                 </button>
               </div>
@@ -984,11 +1117,15 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                     </select>
                   </div>
 
-                  {(searchQuery || statusFilter !== "all" || priorityFilter !== "all") && <button
+                  <ReportDateFilter from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo} />
+
+                  {(searchQuery || statusFilter !== "all" || priorityFilter !== "all" || dateFrom || dateTo) && <button
     onClick={() => {
       setSearchQuery("");
       setStatusFilter("all");
       setPriorityFilter("all");
+      setDateFrom("");
+      setDateTo("");
     }}
     className="text-xs font-bold text-rose-600 dark:text-rose-400 hover:underline px-2"
   >
@@ -1014,12 +1151,13 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                       <th className="py-3 px-4">Pelapor</th>
                       <th className="py-3 px-4">Prioritas</th>
                       <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Penanggung Jawab</th>
                       <th className="py-3 px-4">Tanggal</th>
                       <th className="py-3 px-4 text-right">Aksi</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {filteredReports.map((rep) => {
+                    {paginate(filteredReports, page).map((rep) => {
     const dateFormatted = new Date(rep.created_at).toLocaleDateString("id-ID", {
       day: "numeric",
       month: "short",
@@ -1044,7 +1182,13 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                             <PriorityBadge priority={rep.priority} />
                           </td>
                           <td className="py-3.5 px-4">
-                            <ReportStatusBadge status={rep.status} />
+                            <div className="flex flex-col items-start gap-1">
+                              <ReportStatusBadge status={rep.status} />
+                              <OverdueBadge report={rep} />
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300">
+                            {rep.technician?.name || (rep.vendor ? `${rep.vendor.name} (vendor)` : <span className="text-slate-400">Belum ditunjuk</span>)}
                           </td>
                           <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                             {dateFormatted}
@@ -1055,7 +1199,7 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
       className="px-3.5 py-1.5 text-xs font-bold text-teal-800 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/50 rounded-xl transition-colors inline-flex items-center gap-1.5 border border-teal-200 dark:border-teal-800"
     >
                               <Eye className="w-3.5 h-3.5" />
-                              <span>Tindak Lanjut</span>
+                              <span>{rep.status === "reported" ? "Verifikasi" : "Tindak Lanjut"}</span>
                             </button>
                           </td>
                         </tr>;
@@ -1063,6 +1207,7 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                   </tbody>
                 </table>
               </div>}
+            <Pagination page={page} total={filteredReports.length} onChange={setPage} />
 
           </div>
         </div>}
@@ -1488,7 +1633,7 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                 </div>
                 <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">Verifikasi Awal</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Buka tiket aduan, cek foto kerusakan, dan validasi lokasi ruangan bersama pelapor jika belum jelas.
+                  Buka tiket aduan, cek foto kerusakan, lalu verifikasi. Tolak dengan alasan jika laporan tidak valid atau duplikat.
                 </p>
               </div>
 
@@ -1496,9 +1641,9 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                 <div className="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-400 flex items-center justify-center font-black text-xs mb-2">
                   2
                 </div>
-                <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">Ubah ke "Diproses"</h4>
+                <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">Tunjuk Teknisi / Vendor</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Hubungi teknisi MEP internal atau vendor rekanan terkait. Tuliskan catatan estimasi penanganan.
+                  Verifikasi laporan, lalu tugaskan ke teknisi internal atau vendor rekanan beserta batas waktu (SLA) penanganan.
                 </p>
               </div>
 
@@ -1508,7 +1653,7 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                 </div>
                 <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">Pengerjaan Fisik</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Ubah status ke "Diperbaiki" saat tindakan fisik selesai atau suku cadang baru terpasang.
+                  Teknisi menerima tugas, mengerjakan perbaikan, mencatat progres, material, dan biaya hingga status "Diperbaiki".
                 </p>
               </div>
 
@@ -1516,18 +1661,15 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
                 <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-black text-xs mb-2">
                   4
                 </div>
-                <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">Uji Fungsi & Tutup</h4>
+                <h4 className="font-extrabold text-xs text-slate-900 dark:text-white">Konfirmasi Pelapor</h4>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Lakukan pengetesan akhir bersama pengguna, isi ringkasan perbaikan, lalu ubah status ke "Selesai".
+                  Pelapor menguji fasilitas dan mengonfirmasi "Selesai", atau menolak hasil sehingga kembali ke teknisi.
                 </p>
               </div>
             </div>
           </div>
 
-          {
-    /* Directory of Vendors & GA Emergency Contacts */
-  }
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-6 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-400">
                 DIREKTORI REKANAN
@@ -1535,65 +1677,18 @@ export const AdminView = ({ currentTab, onSelectTab }) => {
               <h3 className="text-base font-extrabold text-slate-900 dark:text-white mt-0.5">
                 Kontak Vendor & Teknisi Pemeliharaan Resmi
               </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Kini dikelola langsung dari database: tambah, ubah, dan pantau beban kerja teknisi.</p>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-700 transition-colors">
-                <div className="font-bold text-xs text-slate-900 dark:text-white">HVAC & Tata Udara (AC Sentral)</div>
-                <div className="text-xs text-teal-700 dark:text-teal-400 font-semibold mt-1">PT Sejuk Mandiri Teknik</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
-                  <PhoneCall className="w-3.5 h-3.5 text-slate-400" />
-                  <span>0812-3456-7890 (Pak Bambang)</span>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-700 transition-colors">
-                <div className="font-bold text-xs text-slate-900 dark:text-white">Lift & Eskalator Penumpang</div>
-                <div className="text-xs text-teal-700 dark:text-teal-400 font-semibold mt-1">Kone Elevator Indonesia</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
-                  <PhoneCall className="w-3.5 h-3.5 text-slate-400" />
-                  <span>0811-9876-5432 (Hotline 24 Jam)</span>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-700 transition-colors">
-                <div className="font-bold text-xs text-slate-900 dark:text-white">Fire Safety & APAR Gedung</div>
-                <div className="text-xs text-teal-700 dark:text-teal-400 font-semibold mt-1">Safety First Solusindo</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
-                  <PhoneCall className="w-3.5 h-3.5 text-slate-400" />
-                  <span>0813-2468-1357 (Inspeksi Tabung)</span>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-700 transition-colors">
-                <div className="font-bold text-xs text-slate-900 dark:text-white">Teknisi Kelistrikan & Plumbing MEP</div>
-                <div className="text-xs text-teal-700 dark:text-teal-400 font-semibold mt-1">Tim Teknisi GA Internal</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
-                  <PhoneCall className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Ext. 104 / 0813-8877-6655</span>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-700 transition-colors">
-                <div className="font-bold text-xs text-slate-900 dark:text-white">Genset & Power Plant 250kVA</div>
-                <div className="text-xs text-teal-700 dark:text-teal-400 font-semibold mt-1">PT Daya Nusantara Power</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
-                  <PhoneCall className="w-3.5 h-3.5 text-slate-400" />
-                  <span>0812-7788-9900 (Teknisi Mesin)</span>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-teal-300 dark:hover:border-teal-700 transition-colors">
-                <div className="font-bold text-xs text-slate-900 dark:text-white">Layanan Darurat Publik Kota</div>
-                <div className="text-xs text-teal-700 dark:text-teal-400 font-semibold mt-1">Damkar, PLN, PDAM</div>
-                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-1.5">
-                  <PhoneCall className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Damkar: 113 • PLN: 123</span>
-                </div>
-              </div>
-            </div>
+            <button onClick={() => onSelectTab("directory")} className="px-4 py-2.5 text-xs font-bold text-white bg-teal-700 hover:bg-teal-800 rounded-xl flex items-center gap-1.5 self-start sm:self-auto">
+              <PhoneCall className="w-3.5 h-3.5" />
+              <span>Buka Direktori</span>
+            </button>
           </div>
         </div>}
+
+      {currentTab === "directory" && <DirectoryPage />}
+      {currentTab === "users" && <UsersPage />}
+      {currentTab === "audit" && <AuditPage />}
 
       {
     /* Report Modal */

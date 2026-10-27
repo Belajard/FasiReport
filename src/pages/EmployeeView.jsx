@@ -4,6 +4,10 @@ import { dataService } from "../services/dataService";
 import { ReportStatusBadge } from "../components/ReportStatusBadge";
 import { PriorityBadge } from "../components/PriorityBadge";
 import { ReportModal } from "../components/ReportModal";
+import { STATUS_CONFIG } from "../types";
+import { Pagination, paginate } from "../components/Pagination";
+import { ReportDateFilter, inDateRange } from "../components/ReportDateFilter";
+import { CreateEditReportModal } from "../components/CreateEditReportModal";
 import {
   FileText,
   Building2,
@@ -21,11 +25,14 @@ import {
   Send,
   Wrench,
   Sparkles,
-  ArrowUpRight
+  ArrowUpRight,
+  Pencil
 } from "lucide-react";
 export const EmployeeView = ({
   currentTab,
-  onSelectTab
+  onSelectTab,
+  focusReportId,
+  onFocusHandled
 }) => {
   const { user, showToast } = useAuth();
   const [reports, setReports] = useState([]);
@@ -35,6 +42,7 @@ export const EmployeeView = ({
   const [createDescription, setCreateDescription] = useState("");
   const [createPriority, setCreatePriority] = useState("medium");
   const [createPhotoPreview, setCreatePhotoPreview] = useState(null);
+  const [createPhotoFile, setCreatePhotoFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
   const fileInputRef = useRef(null);
@@ -42,6 +50,11 @@ export const EmployeeView = ({
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [selectedReport, setSelectedReport] = useState(null);
+  const [editReport, setEditReport] = useState(null);
+  const [page, setPage] = useState(1);
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
+  useEffect(() => setPage(1), [searchQuery, statusFilter, priorityFilter, dateFrom, dateTo]);
   const loadData = () => {
     if (!user) return;
     const myReports = dataService.getReports(user);
@@ -62,24 +75,34 @@ export const EmployeeView = ({
     });
     return () => unsubscribe();
   }, [user]);
+  useEffect(() => {
+    if (!focusReportId) return;
+    const r = reports.find((x) => x.id === focusReportId);
+    if (r) {
+      setSelectedReport(r);
+      if (onFocusHandled) onFocusHandled();
+    }
+  }, [focusReportId, reports]);
   if (!user) return null;
   const latestReport = reports.length > 0 ? reports[0] : null;
-  const inProgressReports = reports.filter((r) => r.status === "reported" || r.status === "processing");
+  const inProgressReports = reports.filter((r) => ["reported", "assigned", "processing"].includes(r.status));
+  const awaitingConfirm = reports.filter((r) => r.status === "repaired");
   const completedReports = reports.filter((r) => r.status === "completed" || r.status === "repaired");
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 8 * 1024 * 1024) {
-      showToast("Ukuran foto maksimal 8 MB.", "error");
+    if (file.size > 5 * 1024 * 1024) {
+      showToast("Ukuran foto maksimal 5 MB.", "error");
       return;
     }
+    setCreatePhotoFile(file);
     const reader = new FileReader();
     reader.onload = () => {
       setCreatePhotoPreview(reader.result);
     };
     reader.readAsDataURL(file);
   };
-  const handleSubmitReport = (e) => {
+  const handleSubmitReport = async (e) => {
     e.preventDefault();
     setFormError(null);
     if (!createFacilityId) {
@@ -92,20 +115,19 @@ export const EmployeeView = ({
     }
     try {
       setIsSubmitting(true);
-      dataService.createReport(
-        {
-          facility_id: parseInt(createFacilityId, 10),
-          description: createDescription.trim(),
-          priority: createPriority,
-          photo: createPhotoPreview || void 0
-        },
-        user
-      );
+      const photoUrl = createPhotoFile ? await dataService.uploadPhoto(createPhotoFile) : void 0;
+      await dataService.createReport({
+        facility_id: parseInt(createFacilityId, 10),
+        description: createDescription.trim(),
+        priority: createPriority,
+        photo: photoUrl
+      });
       showToast("Laporan kerusakan fasilitas berhasil dikirim ke tim Admin!", "success");
       setCreateFacilityId("");
       setCreateDescription("");
       setCreatePriority("medium");
       setCreatePhotoPreview(null);
+      setCreatePhotoFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
       loadData();
       onSelectTab("my-reports");
@@ -119,15 +141,15 @@ export const EmployeeView = ({
     const matchesSearch = (r.facility?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || r.description.toLowerCase().includes(searchQuery.toLowerCase()) || r.id.toString().includes(searchQuery);
     const matchesStatus = statusFilter === "all" || r.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || r.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+    return matchesSearch && matchesStatus && matchesPriority && inDateRange(r.created_at, dateFrom, dateTo);
   });
-  const handleDelete = (report) => {
+  const handleDelete = async (report) => {
     if (report.status !== "reported") {
       showToast("Laporan yang sudah diproses tidak dapat dihapus.", "error");
       return;
     }
     try {
-      dataService.deleteReport(report.id, user);
+      await dataService.deleteReport(report.id);
       showToast("Laporan berhasil dibatalkan dan dihapus.", "success");
       loadData();
     } catch (err) {
@@ -159,6 +181,19 @@ export const EmployeeView = ({
             </div>
           </div>
 
+          {awaitingConfirm.length > 0 && <button
+    onClick={() => setSelectedReport(awaitingConfirm[0])}
+    className="w-full text-left bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900/60 rounded-2xl p-4 flex items-center gap-3 hover:border-indigo-400 transition-colors"
+  >
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-800">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div className="text-xs text-indigo-900 dark:text-indigo-200">
+                <div className="font-extrabold text-sm">Perbaikan Menunggu Konfirmasi Anda</div>
+                <strong>{awaitingConfirm.length} laporan</strong> sudah diperbaiki teknisi. Periksa fasilitas lalu konfirmasi apakah sudah baik.
+              </div>
+            </button>}
+
           {
     /* Metric Cards Row */
   }
@@ -177,7 +212,7 @@ export const EmployeeView = ({
                 </div>
               </div>
               <div className="text-xl font-extrabold text-slate-900 dark:text-white mt-2 truncate capitalize">
-                {latestReport ? latestReport.status === "completed" ? "Selesai" : latestReport.status === "repaired" ? "Diperbaiki" : latestReport.status === "processing" ? "Diproses" : "Dilaporkan" : "Belum Ada"}
+                {latestReport ? STATUS_CONFIG[latestReport.status]?.label || "Dilaporkan" : "Belum Ada"}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-1">
                 {latestReport?.facility?.name || "Tidak ada aduan aktif"}
@@ -589,7 +624,7 @@ export const EmployeeView = ({
   />
                     <button
     type="button"
-    onClick={() => setCreatePhotoPreview(null)}
+    onClick={() => { setCreatePhotoPreview(null); setCreatePhotoFile(null); }}
     className="absolute -top-2 -right-2 w-6 h-6 bg-rose-600 text-white rounded-full text-xs font-bold flex items-center justify-center shadow-xs"
   >
                       ×
@@ -666,10 +701,14 @@ export const EmployeeView = ({
   >
                 <option value="all">Semua Status</option>
                 <option value="reported">Dilaporkan</option>
+                <option value="assigned">Ditugaskan</option>
                 <option value="processing">Diproses</option>
                 <option value="repaired">Diperbaiki</option>
                 <option value="completed">Selesai</option>
+                <option value="rejected">Ditolak</option>
               </select>
+
+              <ReportDateFilter from={dateFrom} to={dateTo} onFrom={setDateFrom} onTo={setDateTo} />
 
               <select
     value={priorityFilter}
@@ -702,7 +741,7 @@ export const EmployeeView = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {filteredReports.map((rep) => <tr key={rep.id} className="hover:bg-teal-50/20 dark:hover:bg-slate-800/60 transition-colors">
+                  {paginate(filteredReports, page).map((rep) => <tr key={rep.id} className="hover:bg-teal-50/20 dark:hover:bg-slate-800/60 transition-colors">
                       <td className="py-3.5 px-4 font-mono font-medium text-slate-400 dark:text-slate-500">#{rep.id}</td>
                       <td className="py-3.5 px-4">
                         <div className="font-bold text-slate-900 dark:text-white">{rep.facility?.name}</div>
@@ -730,6 +769,13 @@ export const EmployeeView = ({
                             <Eye className="w-4 h-4" />
                           </button>
                           {rep.status === "reported" && <button
+    onClick={() => setEditReport(rep)}
+    className="p-1.5 text-slate-400 hover:text-teal-700 dark:hover:text-teal-300 hover:bg-teal-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
+    title="Edit Laporan"
+  >
+                              <Pencil className="w-4 h-4" />
+                            </button>}
+                          {rep.status === "reported" && <button
     onClick={() => handleDelete(rep)}
     className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors"
     title="Batalkan & Hapus"
@@ -742,6 +788,7 @@ export const EmployeeView = ({
                 </tbody>
               </table>
             </div>}
+          <Pagination page={page} total={filteredReports.length} onChange={setPage} />
         </div>}
 
       {
@@ -933,6 +980,14 @@ export const EmployeeView = ({
     isOpen={!!selectedReport}
     onClose={() => setSelectedReport(null)}
     onReportUpdated={loadData}
+    onOpenEdit={(r) => setEditReport(r)}
+  />}
+
+      {editReport && <CreateEditReportModal
+    isOpen
+    reportToEdit={editReport}
+    onClose={() => setEditReport(null)}
+    onSuccess={loadData}
   />}
 
     </div>;

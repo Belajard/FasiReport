@@ -33,7 +33,7 @@ export const FacilityModal = ({
   }, [isOpen, facilityToEdit]);
   if (!isOpen || !user) return null;
   const isEditing = !!facilityToEdit;
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg(null);
     if (!name.trim() || !location.trim() || !category.trim()) {
@@ -43,26 +43,24 @@ export const FacilityModal = ({
     try {
       setIsSubmitting(true);
       if (isEditing) {
-        dataService.updateFacility(
+        await dataService.updateFacility(
           facilityToEdit.id,
           {
             name: name.trim(),
             location: location.trim(),
             category: category.trim(),
             status
-          },
-          user
+          }
         );
         showToast(`Fasilitas '${name}' berhasil diperbarui.`, "success");
       } else {
-        dataService.createFacility(
+        await dataService.createFacility(
           {
             name: name.trim(),
             location: location.trim(),
             category: category.trim(),
             status
-          },
-          user
+          }
         );
         showToast(`Fasilitas baru '${name}' berhasil ditambahkan.`, "success");
       }

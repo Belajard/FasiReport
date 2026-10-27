@@ -16,6 +16,7 @@ export const MaintenanceModal = ({
   const [date, setDate] = useState("");
   const [type, setType] = useState("");
   const [pic, setPic] = useState("");
+  const [picOption, setPicOption] = useState("custom");
   const [status, setStatus] = useState("upcoming");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
@@ -24,9 +25,10 @@ export const MaintenanceModal = ({
       if (itemToEdit) {
         setFacilityName(itemToEdit.facility);
         setLocation(itemToEdit.location);
-        setDate(itemToEdit.date);
+        setDate(itemToEdit.date_iso || "");
         setType(itemToEdit.type);
         setPic(itemToEdit.pic);
+        setPicOption(itemToEdit.technician_id ? `tech:${itemToEdit.technician_id}` : itemToEdit.vendor_id ? `vendor:${itemToEdit.vendor_id}` : "custom");
         setStatus(itemToEdit.status);
         const match = facilities.find((f) => f.name.toLowerCase() === itemToEdit.facility.toLowerCase());
         if (match) {
@@ -38,9 +40,10 @@ export const MaintenanceModal = ({
         setSelectedFacilityOption("");
         setFacilityName("");
         setLocation("");
-        setDate((/* @__PURE__ */ new Date()).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }));
+        setDate((/* @__PURE__ */ new Date()).toISOString().slice(0, 10));
         setType("");
         setPic("");
+        setPicOption("");
         setStatus("upcoming");
       }
       setErrorMsg(null);
@@ -61,7 +64,21 @@ export const MaintenanceModal = ({
       }
     }
   };
-  const handleSubmit = (e) => {
+  const technicians = dataService.getTechnicians().filter((t) => t.is_active);
+  const vendors = dataService.getVendors().filter((v) => v.is_active);
+  const handlePicSelect = (val) => {
+    setPicOption(val);
+    if (val.startsWith("tech:")) {
+      const t = technicians.find((x) => `tech:${x.id}` === val);
+      if (t) setPic(t.name);
+    } else if (val.startsWith("vendor:")) {
+      const v = vendors.find((x) => `vendor:${x.id}` === val);
+      if (v) setPic(v.name);
+    } else if (val === "custom") {
+      setPic("");
+    }
+  };
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg(null);
     const cleanFacility = facilityName.trim();
@@ -75,24 +92,30 @@ export const MaintenanceModal = ({
     }
     try {
       setIsSubmitting(true);
+      const link = {
+        technician_id: picOption.startsWith("tech:") ? Number(picOption.slice(5)) : null,
+        vendor_id: picOption.startsWith("vendor:") ? Number(picOption.slice(7)) : null
+      };
       if (isEditing && itemToEdit) {
-        dataService.updateMaintenanceSchedule(itemToEdit.id, {
+        await dataService.updateMaintenanceSchedule(itemToEdit.id, {
           facility: cleanFacility,
           location: cleanLocation,
-          date: cleanDate,
+          scheduled_date: cleanDate,
           type: cleanType,
           pic: cleanPic,
-          status
+          status,
+          ...link
         });
         showToast(`Jadwal servis '${cleanFacility}' berhasil diperbarui.`, "success");
       } else {
-        dataService.createMaintenanceSchedule({
+        await dataService.createMaintenanceSchedule({
           facility: cleanFacility,
           location: cleanLocation,
-          date: cleanDate,
+          scheduled_date: cleanDate,
           type: cleanType,
           pic: cleanPic,
-          status
+          status,
+          ...link
         });
         showToast(`Jadwal servis baru '${cleanFacility}' berhasil ditambahkan.`, "success");
       }
@@ -195,13 +218,12 @@ export const MaintenanceModal = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
-                Tanggal / Periode Pelaksanaan <span className="text-rose-500">*</span>
+                Tanggal Pelaksanaan <span className="text-rose-500">*</span>
               </label>
               <input
-    type="text"
+    type="date"
     value={date}
     onChange={(e) => setDate(e.target.value)}
-    placeholder="Contoh: 28 September 2026 atau Setiap Senin"
     className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-900 dark:text-white"
     required
   />
@@ -241,14 +263,27 @@ export const MaintenanceModal = ({
             <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">
               Pelaksana / Vendor / PIC Teknisi <span className="text-rose-500">*</span>
             </label>
-            <input
+            <select
+    value={picOption}
+    onChange={(e) => handlePicSelect(e.target.value)}
+    className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-900 dark:text-white font-semibold"
+  >
+              <option value="">-- Pilih pelaksana --</option>
+              {technicians.length > 0 && <optgroup label="Teknisi Internal">
+                  {technicians.map((t) => <option key={t.id} value={`tech:${t.id}`}>{t.name}{t.specialty ? ` — ${t.specialty}` : ""}</option>)}
+                </optgroup>}
+              {vendors.length > 0 && <optgroup label="Vendor Rekanan">
+                  {vendors.map((v) => <option key={v.id} value={`vendor:${v.id}`}>{v.name} — {v.category}</option>)}
+                </optgroup>}
+              <option value="custom">Lainnya (ketik manual)</option>
+            </select>
+            {picOption === "custom" && <input
     type="text"
     value={pic}
     onChange={(e) => setPic(e.target.value)}
-    placeholder="Contoh: PT Sejuk Mandiri (Vendor HVAC) / Teknisi Internal"
-    className="w-full px-3.5 py-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-900 dark:text-white"
-    required
-  />
+    placeholder="Contoh: Teknisi MEP Internal / nama pelaksana lain"
+    className="w-full mt-2 px-3.5 py-2.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-600 text-slate-900 dark:text-white"
+  />}
           </div>
 
           {

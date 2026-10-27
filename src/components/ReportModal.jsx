@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { NEXT_STATUS_MAP, STATUS_CONFIG } from "../types";
 import { useAuth } from "../context/AuthContext";
-import { dataService } from "../services/dataService";
 import { ReportStatusBadge } from "./ReportStatusBadge";
 import { PriorityBadge } from "./PriorityBadge";
 import { ReportTimeline } from "./ReportTimeline";
+import { ReportActions } from "./ReportActions";
+import { ReportComments } from "./ReportComments";
 import {
   X,
   MapPin,
@@ -12,12 +12,10 @@ import {
   User,
   Mail,
   Calendar,
-  ArrowRight,
-  AlertCircle,
-  Pencil,
-  Trash2,
-  CheckCircle,
-  MessageSquare
+  MessageSquare,
+  Wrench,
+  Timer,
+  Wallet
 } from "lucide-react";
 export const ReportModal = ({
   report,
@@ -26,46 +24,14 @@ export const ReportModal = ({
   onReportUpdated,
   onOpenEdit
 }) => {
-  const { user, showToast } = useAuth();
-  const [adminNote, setAdminNote] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { user } = useAuth();
   const [selectedPhotoZoom, setSelectedPhotoZoom] = useState(null);
   if (!isOpen || !user) return null;
-  const isAdmin = user.role === "admin";
-  const isOwner = report.user_id === user.id;
-  const canEditOrDelete = isOwner && report.status === "reported";
-  const nextStatus = NEXT_STATUS_MAP[report.status];
-  const handleAdvanceStatus = async () => {
-    if (!isAdmin || !nextStatus) return;
-    try {
-      setIsUpdating(true);
-      dataService.updateReportStatus(report.id, nextStatus, adminNote || null, user);
-      showToast(
-        `Status berhasil diperbarui menjadi ${STATUS_CONFIG[nextStatus].label}`,
-        "success"
-      );
-      setAdminNote("");
-      onReportUpdated();
-    } catch (err) {
-      showToast(err.message || "Gagal memperbarui status", "error");
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-  const handleDeleteReport = () => {
-    try {
-      setIsDeleting(true);
-      dataService.deleteReport(report.id, user);
-      showToast("Laporan berhasil dihapus.", "success");
-      onReportUpdated();
-      onClose();
-    } catch (err) {
-      showToast(err.message || "Gagal menghapus laporan", "error");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
+  const canSeeReporter = user.role === "admin" || user.role === "technician";
+  const responsible = report.technician
+    ? `${report.technician.name}${report.technician.specialty ? ` (${report.technician.specialty})` : ""}`
+    : report.vendor ? `${report.vendor.name} (Vendor)` : null;
+  const fmt = (d) => new Date(d).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
   const dateCreated = new Date(report.created_at).toLocaleString("id-ID", {
     day: "numeric",
     month: "long",
@@ -132,7 +98,7 @@ export const ReportModal = ({
               </div>
             </div>
 
-            {isAdmin && <>
+            {canSeeReporter && <>
                 <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 sm:col-span-2">
                   <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <div>
@@ -156,6 +122,41 @@ export const ReportModal = ({
                   </div>
                 </div>
               </>}
+
+            {responsible && <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <Wrench className="w-4 h-4 text-teal-600 dark:text-teal-400 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Penanggung Jawab</div>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">{responsible}</div>
+                </div>
+              </div>}
+
+            {report.due_at && <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <Timer className={`w-4 h-4 shrink-0 ${report.is_overdue ? "text-rose-600" : "text-amber-600 dark:text-amber-400"}`} />
+                <div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Batas Waktu (SLA)</div>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                    {fmt(report.due_at)}
+                    {report.is_overdue && <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-bold">Terlambat</span>}
+                  </div>
+                </div>
+              </div>}
+
+            {report.vendor_ticket && <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <Tag className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Tiket Vendor</div>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">{report.vendor_ticket}</div>
+                </div>
+              </div>}
+
+            {Number(report.cost) > 0 && canSeeReporter && <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300">
+                <Wallet className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <div>
+                  <div className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">Biaya Perbaikan</div>
+                  <div className="font-semibold text-slate-800 dark:text-slate-200">Rp {Number(report.cost).toLocaleString("id-ID")}</div>
+                </div>
+              </div>}
           </div>
 
           {
@@ -200,7 +201,7 @@ export const ReportModal = ({
           {report.admin_note && <div className="p-4 bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800 rounded-xl">
               <div className="flex items-center gap-2 text-xs font-bold text-sky-900 dark:text-sky-300 mb-1">
                 <MessageSquare className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                Catatan Terkini Admin
+                Catatan Terkini
               </div>
               <p className="text-sm text-sky-950 dark:text-sky-200">{report.admin_note}</p>
             </div>}
@@ -215,93 +216,21 @@ export const ReportModal = ({
   />
           </div>
 
-          {
-    /* ADMIN ACTION PANEL: Strict Sequential Progress */
-  }
-          {isAdmin && <div className="pt-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 -mx-6 -mb-6 p-6">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                  Tindakan Admin & Pembaruan Status
-                </h4>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  Alur: Dilaporkan → Diproses → Diperbaiki → Selesai
-                </span>
+          {report.materials?.length > 0 && <div>
+              <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                Material Terpakai
+              </h4>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-800 text-xs">
+                {report.materials.map((m) => <div key={m.id} className="flex items-center justify-between px-3 py-2 text-slate-700 dark:text-slate-300">
+                    <span>{m.name} <span className="text-slate-400">× {Number(m.qty)}</span></span>
+                    <span className="font-mono">Rp {(Number(m.qty) * Number(m.unit_cost)).toLocaleString("id-ID")}</span>
+                  </div>)}
               </div>
-
-              {nextStatus ? <div className="space-y-3 bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                      Catatan Admin untuk Perubahan Status
-                    </label>
-                    <input
-    type="text"
-    value={adminNote}
-    onChange={(e) => setAdminNote(e.target.value)}
-    placeholder="Contoh: Sedang ditindaklanjuti oleh teknisi vendor pendingin..."
-    className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-  />
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      Status saat ini: <strong className="text-slate-900 dark:text-slate-200">{STATUS_CONFIG[report.status].label}</strong>
-                      <span className="mx-2 text-slate-300 dark:text-slate-600">→</span>
-                      Berikutnya: <strong className="text-teal-700 dark:text-teal-400">{STATUS_CONFIG[nextStatus].label}</strong>
-                    </div>
-
-                    <button
-    onClick={handleAdvanceStatus}
-    disabled={isUpdating}
-    className="px-4 py-2 text-xs font-bold text-white bg-gradient-to-r from-teal-600 to-sky-600 hover:from-teal-700 hover:to-sky-700 rounded-lg shadow-sm shadow-teal-600/20 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
-  >
-                      <span>Perbarui ke: {STATUS_CONFIG[nextStatus].label}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div> : <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-800 dark:text-emerald-300">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span>
-                    Laporan ini telah mencapai status <strong>Selesai (Completed)</strong>. Seluruh proses perbaikan telah tuntas dan laporan terkunci.
-                  </span>
-                </div>}
             </div>}
 
-          {
-    /* EMPLOYEE ACTION PANEL: Edit/Delete if status is 'reported' */
-  }
-          {!isAdmin && isOwner && <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
-              {canEditOrDelete ? <div className="flex items-center justify-between p-3.5 bg-amber-50/70 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
-                  <div className="text-xs text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>Laporan berstatus <strong>Dilaporkan</strong> masih dapat diedit atau dibatalkan.</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {onOpenEdit && <button
-    onClick={() => {
-      onClose();
-      onOpenEdit(report);
-    }}
-    className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 hover:bg-slate-50 rounded-lg flex items-center gap-1 transition-colors"
-  >
-                        <Pencil className="w-3.5 h-3.5" />
-                        Edit Laporan
-                      </button>}
-                    <button
-    onClick={handleDeleteReport}
-    disabled={isDeleting}
-    className="px-3 py-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 hover:bg-rose-100 rounded-lg flex items-center gap-1 transition-colors disabled:opacity-50"
-  >
-                      <Trash2 className="w-3.5 h-3.5" />
-                      Hapus
-                    </button>
-                  </div>
-                </div> : <div className="p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-600 dark:text-slate-400 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>
-                    Laporan ini sudah dalam penanganan admin (status: <strong>{STATUS_CONFIG[report.status].label}</strong>). Laporan tidak dapat diedit atau dihapus sesuai aturan sistem.
-                  </span>
-                </div>}
-            </div>}
+          <ReportComments reportId={report.id} />
+
+          <ReportActions report={report} onChanged={onReportUpdated} onOpenEdit={onOpenEdit} onClose={onClose} />
         </div>
 
         {

@@ -61,23 +61,23 @@ export const CreateEditReportModal = ({
   }, [isOpen, reportToEdit]);
   if (!isOpen || !user) return null;
   const isEditing = !!reportToEdit;
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       setErrorMsg("Format file harus berupa gambar (JPG, PNG, WebP).");
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      setErrorMsg("Ukuran file melebihi batas maksimal 8 MB.");
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMsg("Ukuran file melebihi batas maksimal 5 MB.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPhotoUrl(reader.result);
+    try {
+      setPhotoUrl(await dataService.uploadPhoto(file));
       setErrorMsg(null);
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      setErrorMsg(err.message || "Gagal mengunggah foto.");
+    }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,34 +86,27 @@ export const CreateEditReportModal = ({
       setErrorMsg("Silakan pilih fasilitas yang ingin dilaporkan.");
       return;
     }
-    if (!description.trim() || description.trim().length < 5) {
-      setErrorMsg("Deskripsi masalah minimal harus 5 karakter.");
+    if (!description.trim() || description.trim().length < 10) {
+      setErrorMsg("Deskripsi masalah minimal harus 10 karakter.");
       return;
     }
     try {
       setIsSubmitting(true);
       if (isEditing) {
-        dataService.updateReport(
-          reportToEdit.id,
-          {
-            facility_id: Number(facilityId),
-            description,
-            priority,
-            photo: photoUrl
-          },
-          user
-        );
+        await dataService.updateReport(reportToEdit.id, {
+          facility_id: Number(facilityId),
+          description: description.trim(),
+          priority,
+          photo: photoUrl
+        });
         showToast("Laporan kerusakan berhasil diperbarui.", "success");
       } else {
-        dataService.createReport(
-          {
-            facility_id: Number(facilityId),
-            description,
-            priority,
-            photo: photoUrl
-          },
-          user
-        );
+        await dataService.createReport({
+          facility_id: Number(facilityId),
+          description: description.trim(),
+          priority,
+          photo: photoUrl
+        });
         showToast("Laporan baru berhasil dikirim ke sistem FasiReport.", "success");
       }
       onSuccess();

@@ -1,13 +1,15 @@
-import { STATUS_CONFIG } from "../types";
+import { STATUS_CONFIG, ROLE_LABEL } from "../types";
 import { CheckCircle2, Clock, Wrench, CheckCheck } from "lucide-react";
 const STEPS = [
   { status: "reported", label: "Dilaporkan", icon: Clock },
-  { status: "processing", label: "Diproses", icon: Clock },
+  { status: "assigned", label: "Ditugaskan", icon: Clock },
+  { status: "processing", label: "Diproses", icon: Wrench },
   { status: "repaired", label: "Diperbaiki", icon: Wrench },
   { status: "completed", label: "Selesai", icon: CheckCheck }
 ];
 export const ReportTimeline = ({ currentStatus, histories = [] }) => {
   const currentStepNumber = STATUS_CONFIG[currentStatus]?.step || 1;
+  const isRejected = currentStatus === "rejected";
   return <div className="space-y-6">
       {
     /* Visual Stepper Tracker */
@@ -16,11 +18,14 @@ export const ReportTimeline = ({ currentStatus, histories = [] }) => {
         <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
           Tahapan Penanganan
         </h4>
-        <div className="relative flex items-center justify-between">
+        {isRejected && <div className="mb-3 p-3 rounded-xl border border-rose-200 bg-rose-50 dark:bg-rose-950/30 dark:border-rose-900/60 text-xs font-bold text-rose-700 dark:text-rose-300">
+            Laporan ini ditolak setelah verifikasi admin dan tidak dilanjutkan.
+          </div>}
+        {!isRejected && <div className="relative flex items-center justify-between">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-slate-200 w-full z-0" />
           <div
     className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-teal-500 to-sky-500 transition-all duration-500 z-0"
-    style={{ width: `${(currentStepNumber - 1) / 3 * 100}%` }}
+    style={{ width: `${(currentStepNumber - 1) / 4 * 100}%` }}
   />
 
           {STEPS.map((step) => {
@@ -43,7 +48,7 @@ export const ReportTimeline = ({ currentStatus, histories = [] }) => {
                 </div>
               </div>;
   })}
-        </div>
+        </div>}
       </div>
 
       {
@@ -68,12 +73,12 @@ export const ReportTimeline = ({ currentStatus, histories = [] }) => {
       /* Dot */
     }
                   <div
-      className={`absolute -left-[31px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${h.status === "completed" ? "bg-emerald-500" : h.status === "repaired" ? "bg-indigo-500" : h.status === "processing" ? "bg-sky-500" : "bg-amber-500"}`}
+      className={`absolute -left-[31px] top-1 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${h.status === "completed" ? "bg-emerald-500" : h.status === "repaired" ? "bg-indigo-500" : h.status === "processing" ? "bg-sky-500" : h.status === "assigned" ? "bg-teal-500" : h.status === "rejected" ? "bg-rose-500" : "bg-amber-500"}`}
     />
                   <div className="bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700 rounded-xl p-3 text-xs">
                     <div className="flex flex-wrap items-center justify-between gap-1 mb-1">
-                      <span className={`font-semibold ${statusCfg.text}`}>
-                        {statusCfg.label}
+                      <span className={`font-semibold ${statusCfg?.text}`}>
+                        {statusCfg?.label || h.status}
                       </span>
                       <span className="text-slate-400 dark:text-slate-500 font-mono text-[11px]">
                         {dateFormatted}
@@ -83,6 +88,9 @@ export const ReportTimeline = ({ currentStatus, histories = [] }) => {
                     <div className="text-slate-700 dark:text-slate-200 mt-0.5">
                       {h.note || "Tidak ada catatan tambahan."}
                     </div>
+                    {h.photo && <a href={h.photo} target="_blank" rel="noreferrer">
+                        <img src={h.photo} alt="Foto perbaikan" className="mt-2 h-24 rounded-lg border border-slate-200 dark:border-slate-700 object-cover" />
+                      </a>}
 
                     <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 border-t border-slate-200/60 dark:border-slate-700 pt-1.5">
                       <span>Diubah oleh:</span>
@@ -90,7 +98,7 @@ export const ReportTimeline = ({ currentStatus, histories = [] }) => {
                         {h.changed_by_user?.name || `Pengguna #${h.changed_by}`}
                       </span>
                       {h.changed_by_user?.role && <span className="text-slate-400 dark:text-slate-500">
-                          ({h.changed_by_user.role === "admin" ? "Admin" : "Pelapor"})
+                          ({ROLE_LABEL[h.changed_by_user.role] || h.changed_by_user.role})
                         </span>}
                     </div>
                   </div>

@@ -10,7 +10,13 @@ import {
   X,
   Sliders,
   CalendarDays,
-  BookOpenCheck
+  BookOpenCheck,
+  Users,
+  Contact,
+  ScrollText,
+  ClipboardList,
+  History,
+  UserCog
 } from "lucide-react";
 export const Sidebar = ({
   currentTab,
@@ -21,6 +27,7 @@ export const Sidebar = ({
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   if (!user) return null;
   const isAdmin = user.role === "admin";
+  const isTechnician = user.role === "technician";
   const handleNavClick = (tab) => {
     onSelectTab(tab);
     setIsMobileOpen(false);
@@ -29,6 +36,22 @@ export const Sidebar = ({
     setIsMobileOpen(false);
     logout();
   };
+  const navButton = (tab, icon, label, before) => <button
+    key={tab}
+    onClick={() => {
+      if (before) before();
+      handleNavClick(tab);
+    }}
+    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === tab ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
+  >
+      {icon}
+      <span>{label}</span>
+    </button>;
+  const sectionLabel = (text) => <div className="pt-2 pb-1">
+      <div className="px-3 pb-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+        {text}
+      </div>
+    </div>;
   const navContent = <div className="flex flex-col justify-between h-full bg-white dark:bg-slate-900 transition-colors">
       <div>
         {
@@ -80,119 +103,42 @@ export const Sidebar = ({
             Menu Utama
           </div>
 
-          {isAdmin ? <>
-              <button
-    onClick={() => handleNavClick("dashboard")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "dashboard" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Dashboard Admin</span>
-              </button>
-
-              <button
-    onClick={() => handleNavClick("all-reports")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "all-reports" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <FileText className="w-4 h-4" />
-                <span>Semua Laporan</span>
-              </button>
-
-              <button
-    onClick={() => handleNavClick("facilities")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "facilities" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <Sliders className="w-4 h-4" />
-                <span>Kelola Fasilitas</span>
-              </button>
-
-              <div className="pt-2 pb-1">
-                <div className="px-3 pb-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Manajemen & SOP
-                </div>
-              </div>
-
-              <button
-    onClick={() => handleNavClick("maintenance-schedule")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "maintenance-schedule" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <CalendarDays className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                <span>Jadwal Servis Rutin</span>
-              </button>
-
-              <button
-    onClick={() => handleNavClick("guides")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "guides" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <BookOpenCheck className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                <span>Panduan & SOP</span>
-              </button>
-            </> : <>
-              {
-    /* Employee Menu: Enhanced with additional features */
-  }
-              <button
-    onClick={() => handleNavClick("dashboard")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "dashboard" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <LayoutDashboard className="w-4 h-4" />
-                <span>Dashboard</span>
-              </button>
-
-              <button
-    onClick={() => handleNavClick("my-reports")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "my-reports" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <FileText className="w-4 h-4" />
-                <span>Laporan Saya</span>
-              </button>
-
-              <button
-    onClick={() => {
-      if (onOpenCreateReport) onOpenCreateReport();
-      handleNavClick("create-report");
-    }}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "create-report" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <PlusCircle className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                <span>Buat Laporan</span>
-              </button>
-
-              <button
-    onClick={() => handleNavClick("facilities")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "facilities" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <LayoutGrid className="w-4 h-4" />
-                <span>Daftar Fasilitas</span>
-              </button>
-
-              <div className="pt-2 pb-1">
-                <div className="px-3 pb-1.5 text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  Informasi & Layanan
-                </div>
-              </div>
-
-              {
-    /* NEW FEATURE 1: Jadwal Pemeliharaan */
-  }
-              <button
-    onClick={() => handleNavClick("maintenance-schedule")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "maintenance-schedule" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <CalendarDays className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                <span>Jadwal Servis Rutin</span>
-              </button>
-
-              {
-    /* NEW FEATURE 2: Panduan & SOP Pelaporan */
-  }
-              <button
-    onClick={() => handleNavClick("guides")}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === "guides" ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
-  >
-                <BookOpenCheck className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-                <span>Panduan & SOP</span>
-              </button>
+          {isAdmin && <>
+              {navButton("dashboard", <LayoutDashboard className="w-4 h-4" />, "Dashboard Admin")}
+              {navButton("all-reports", <FileText className="w-4 h-4" />, "Semua Laporan")}
+              {navButton("facilities", <Sliders className="w-4 h-4" />, "Kelola Fasilitas")}
+              {sectionLabel("Manajemen & SOP")}
+              {navButton("maintenance-schedule", <CalendarDays className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Jadwal Servis Rutin")}
+              {navButton("directory", <Contact className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Direktori Rekanan")}
+              {navButton("users", <Users className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Kelola Pengguna")}
+              {navButton("audit", <ScrollText className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Log Aktivitas")}
+              {navButton("guides", <BookOpenCheck className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Panduan & SOP")}
             </>}
+
+          {isTechnician && <>
+              {navButton("dashboard", <LayoutDashboard className="w-4 h-4" />, "Dashboard Teknisi")}
+              {navButton("my-tasks", <ClipboardList className="w-4 h-4" />, "Tugas Saya")}
+              {navButton("task-history", <History className="w-4 h-4" />, "Riwayat Perbaikan")}
+              {sectionLabel("Informasi & Layanan")}
+              {navButton("maintenance-schedule", <CalendarDays className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Jadwal Perawatan Saya")}
+              {navButton("directory", <Contact className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Direktori Rekanan")}
+              {navButton("guides", <BookOpenCheck className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Panduan & SOP")}
+            </>}
+
+          {user.role === "employee" && <>
+              {navButton("dashboard", <LayoutDashboard className="w-4 h-4" />, "Dashboard")}
+              {navButton("my-reports", <FileText className="w-4 h-4" />, "Laporan Saya")}
+              {navButton("create-report", <PlusCircle className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Buat Laporan", () => {
+                if (onOpenCreateReport) onOpenCreateReport();
+              })}
+              {navButton("facilities", <LayoutGrid className="w-4 h-4" />, "Daftar Fasilitas")}
+              {sectionLabel("Informasi & Layanan")}
+              {navButton("maintenance-schedule", <CalendarDays className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Jadwal Servis Rutin")}
+              {navButton("guides", <BookOpenCheck className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Panduan & SOP")}
+            </>}
+
+          {sectionLabel("Akun")}
+          {navButton("profile", <UserCog className="w-4 h-4 text-teal-600 dark:text-teal-400" />, "Profil & Kata Sandi")}
         </div>
       </div>
 
