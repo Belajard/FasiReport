@@ -5,6 +5,7 @@ import { ReportStatusBadge } from "../components/ReportStatusBadge";
 import { PriorityBadge } from "../components/PriorityBadge";
 import { ReportModal } from "../components/ReportModal";
 import { STATUS_CONFIG } from "../types";
+import { ScheduleDueBadge } from "../components/ScheduleDueBadge";
 import { Pagination, paginate } from "../components/Pagination";
 import { ReportDateFilter, inDateRange } from "../components/ReportDateFilter";
 import { CreateEditReportModal } from "../components/CreateEditReportModal";
@@ -400,6 +401,7 @@ export const EmployeeView = ({
                           <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-800/80">
                             {item.date}
                           </span>
+                          <div className="mt-1"><ScheduleDueBadge item={item} /></div>
                         </div>
                       </div>)}
                 </div>
@@ -888,6 +890,7 @@ export const EmployeeView = ({
 
                   <div className="text-right shrink-0">
                     <div className="text-xs font-bold text-slate-900 dark:text-white">{item.date}</div>
+                    <ScheduleDueBadge item={item} />
                     <div className="text-[10px] text-slate-400 dark:text-slate-500">Jadwal Pelaksanaan</div>
                   </div>
                 </div>)}

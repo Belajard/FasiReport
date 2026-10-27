@@ -8,6 +8,9 @@ import { FacilityModal } from "../components/FacilityModal";
 import { MaintenanceModal } from "../components/MaintenanceModal";
 import { Pagination, paginate } from "../components/Pagination";
 import { OverdueBadge } from "../components/OverdueBadge";
+import { ScheduleDueBadge } from "../components/ScheduleDueBadge";
+import { FacilityHistoryModal } from "../components/FacilityHistoryModal";
+import { AdminInsights } from "../components/AdminInsights";
 import { DirectoryPage } from "./DirectoryPage";
 import { UsersPage } from "./UsersPage";
 import { AuditPage } from "./AuditPage";
@@ -33,7 +36,8 @@ import {
   BookOpenCheck,
   Trash2,
   PhoneCall,
-  UserCheck
+  UserCheck,
+  History
 } from "lucide-react";
 export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandled }) => {
   const { user, showToast } = useAuth();
@@ -64,6 +68,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
   const [selectedReport, setSelectedReport] = useState(null);
   const [facilityModalOpen, setFacilityModalOpen] = useState(false);
   const [facilityToEdit, setFacilityToEdit] = useState(null);
+  const [historyFacility, setHistoryFacility] = useState(null);
   const [maintenanceSchedules, setMaintenanceSchedules] = useState([]);
   const [maintenanceSearchQuery, setMaintenanceSearchQuery] = useState("");
   const [maintenanceStatusFilter, setMaintenanceStatusFilter] = useState("all");
@@ -525,6 +530,8 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
 
             </div>
           </div>
+
+          <AdminInsights />
 
           {
     /* Secondary Grid: Donut Chart + Facility Summary (Left) & Recent Inbound Reports Table (Right) */
@@ -1251,6 +1258,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
                     <th className="py-3 px-4">Nama Fasilitas</th>
                     <th className="py-3 px-4">Lokasi Gedung / Ruangan</th>
                     <th className="py-3 px-4">Kategori</th>
+                    <th className="py-3 px-4">Riwayat Laporan</th>
                     <th className="py-3 px-4">Status Operasional</th>
                     <th className="py-3 px-4 text-right">Aksi</th>
                   </tr>
@@ -1275,6 +1283,18 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
                           {fac.category}
                         </td>
                         <td className="py-3.5 px-4">
+                          <div className="text-slate-700 dark:text-slate-200 font-semibold">
+                            {fac.report_count} laporan{fac.open_count > 0 && <span className="text-amber-600 dark:text-amber-400 font-bold"> · {fac.open_count} terbuka</span>}
+                          </div>
+                          {fac.is_recurring && <span
+      title={`${fac.recent_count} laporan dalam 90 hari terakhir`}
+      className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200"
+    >
+                              <AlertTriangle className="w-3 h-3" />
+                              Kerusakan berulang
+                            </span>}
+                        </td>
+                        <td className="py-3.5 px-4">
                           <button
       onClick={() => handleToggleFacility(fac.id)}
       className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all border ${isActive ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:bg-slate-200"}`}
@@ -1284,7 +1304,14 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
                             <span>{isActive ? "Aktif" : "Nonaktif"}</span>
                           </button>
                         </td>
-                        <td className="py-3.5 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                          <button
+      onClick={() => setHistoryFacility(fac)}
+      className="p-2 text-slate-600 dark:text-slate-400 hover:text-teal-700 dark:hover:text-teal-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
+      title="Lihat Riwayat Laporan"
+    >
+                            <History className="w-4 h-4" />
+                          </button>
                           <button
       onClick={() => {
         setFacilityToEdit(fac);
@@ -1480,6 +1507,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
                               <Clock className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
                               {item.date}
                             </span>
+                            <ScheduleDueBadge item={item} />
                           </div>
                         </div>
                       </div>
@@ -1685,6 +1713,8 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
             </button>
           </div>
         </div>}
+
+      {historyFacility && <FacilityHistoryModal facility={historyFacility} onClose={() => setHistoryFacility(null)} />}
 
       {currentTab === "directory" && <DirectoryPage />}
       {currentTab === "users" && <UsersPage />}
