@@ -51,7 +51,7 @@ html { scroll-behavior: smooth; }
 @keyframes fr-slide-in { from { transform: translateX(-100%); } to { transform: none; } }
 
 /* Konten halaman: tiap blok muncul berurutan saat berpindah menu */
-.anim-page > * { animation: fr-fade-up .45s cubic-bezier(.22,1,.36,1) both; }
+.anim-page > * { animation: fr-fade-up .45s cubic-bezier(.22,1,.36,1) backwards; }
 .anim-page > *:nth-child(2) { animation-delay: .05s; }
 .anim-page > *:nth-child(3) { animation-delay: .1s; }
 .anim-page > *:nth-child(4) { animation-delay: .15s; }
@@ -62,7 +62,7 @@ html { scroll-behavior: smooth; }
 .anim-overlay { animation: fr-fade-in .2s ease-out both; }
 .anim-overlay > * { animation: fr-pop .3s cubic-bezier(.22,1,.36,1) both; }
 
-.anim-enter { animation: fr-fade-up .55s cubic-bezier(.22,1,.36,1) both; }
+.anim-enter { animation: fr-fade-up .55s cubic-bezier(.22,1,.36,1) backwards; }
 .anim-shake { animation: fr-shake .4s ease-in-out; }
 
 /* Interaksi umum */
@@ -85,7 +85,7 @@ button:not(:disabled):active { transform: scale(.97); }
 @keyframes fr-pulse-soft { 0%,100% { box-shadow: 0 0 0 0 rgb(185 79 70 / .35); } 50% { box-shadow: 0 0 0 5px rgb(185 79 70 / 0); } }
 @keyframes fr-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
-tbody tr { animation: fr-row .4s cubic-bezier(.22,1,.36,1) both; }
+tbody tr { animation: fr-row .4s cubic-bezier(.22,1,.36,1) backwards; }
 tbody tr:nth-child(2) { animation-delay: .04s; } tbody tr:nth-child(3) { animation-delay: .08s; }
 tbody tr:nth-child(4) { animation-delay: .12s; } tbody tr:nth-child(5) { animation-delay: .16s; }
 tbody tr:nth-child(n+6) { animation-delay: .2s; }

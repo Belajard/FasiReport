@@ -48,7 +48,7 @@ export const MaintenanceModal = ({
       }
       setErrorMsg(null);
     }
-  }, [isOpen, itemToEdit, facilities]);
+  }, [isOpen, itemToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!isOpen || !user) return null;
   const isEditing = !!itemToEdit;
   const handleFacilitySelect = (val) => {
@@ -128,7 +128,7 @@ export const MaintenanceModal = ({
     }
   };
   return <div className="anim-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-lg bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-6 animate-in fade-in zoom-in-95 transition-colors">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-6 animate-in fade-in zoom-in-95 transition-colors">
         
         {
     /* Header */

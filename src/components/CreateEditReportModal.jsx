@@ -58,7 +58,7 @@ export const CreateEditReportModal = ({
       }
       setErrorMsg(null);
     }
-  }, [isOpen, reportToEdit]);
+  }, [isOpen, reportToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!isOpen || !user) return null;
   const isEditing = !!reportToEdit;
   const handleFileUpload = async (e) => {

@@ -30,7 +30,7 @@ export const FacilityModal = ({
       }
       setErrorMsg(null);
     }
-  }, [isOpen, facilityToEdit]);
+  }, [isOpen, facilityToEdit?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!isOpen || !user) return null;
   const isEditing = !!facilityToEdit;
   const handleSubmit = async (e) => {
@@ -73,18 +73,18 @@ export const FacilityModal = ({
     }
   };
   return <div className="anim-overlay fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-6 animate-in fade-in zoom-in-95 transition-colors">
+      <div className="relative w-full max-w-xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden my-6 animate-in fade-in zoom-in-95 transition-colors">
         
         {
     /* Header */
   }
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
+        <div className="flex items-center justify-between px-7 py-5 border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 flex items-center justify-center border border-teal-200 dark:border-teal-800/80">
               <Building2 className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 {isEditing ? "Edit Fasilitas" : "Tambah Fasilitas Perusahaan"}
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">Kelola inventaris fasilitas kerja.</p>
@@ -101,14 +101,14 @@ export const FacilityModal = ({
         {
     /* Form */
   }
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-7 space-y-5">
           {errorMsg && <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl flex items-start gap-2 text-xs text-rose-800 dark:text-rose-300">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span>{errorMsg}</span>
             </div>}
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
               Nama Fasilitas <span className="text-rose-500">*</span>
             </label>
             <input
@@ -116,13 +116,13 @@ export const FacilityModal = ({
     value={name}
     onChange={(e) => setName(e.target.value)}
     placeholder="Contoh: AC Ruang Produksi"
-    className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+    className="w-full px-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
     required
   />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
               Lokasi Fasilitas <span className="text-rose-500">*</span>
             </label>
             <input
@@ -130,13 +130,13 @@ export const FacilityModal = ({
     value={location}
     onChange={(e) => setLocation(e.target.value)}
     placeholder="Contoh: Gedung A Lantai 1"
-    className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+    className="w-full px-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
     required
   />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
               Kategori <span className="text-rose-500">*</span>
             </label>
             <input
@@ -144,13 +144,13 @@ export const FacilityModal = ({
     value={category}
     onChange={(e) => setCategory(e.target.value)}
     placeholder="Contoh: Pendingin, Penerangan, Elektronik"
-    className="w-full px-3 py-2 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
+    className="w-full px-4 py-3 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
     required
   />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
               Status Operasional <span className="text-rose-500">*</span>
             </label>
             <div className="flex gap-2">
