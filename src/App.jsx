@@ -14,6 +14,14 @@ const MainLayout = () => {
   const [currentTab, setCurrentTab] = useState("dashboard");
   const [isEmployeeCreateOpen, setIsEmployeeCreateOpen] = useState(false);
   const [focusReportId, setFocusReportId] = useState(null);
+  // Setiap kali akun berganti (login/logout), selalu mulai dari Dashboard
+  const [lastUserId, setLastUserId] = useState(user?.id ?? null);
+  if ((user?.id ?? null) !== lastUserId) {
+    setLastUserId(user?.id ?? null);
+    setCurrentTab("dashboard");
+    setIsEmployeeCreateOpen(false);
+    setFocusReportId(null);
+  }
   if (isLoading) {
     return <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center transition-colors">
         <div className="text-center space-y-3">

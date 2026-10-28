@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+/* ---------- Palet lembut (soft): sage, pasir, koral, biru kabut ---------- */
+@theme {
+  --color-teal-50:#f4f8f6; --color-teal-100:#e5efeb; --color-teal-200:#cddfd8; --color-teal-300:#aac8bd; --color-teal-400:#84ab9d;
+  --color-teal-500:#6a9486; --color-teal-600:#55806f; --color-teal-700:#46695c; --color-teal-800:#3a554b; --color-teal-900:#30443d; --color-teal-950:#1b2823;
+
+  --color-slate-50:#f7f8f7; --color-slate-100:#eef0ef; --color-slate-200:#e1e5e3; --color-slate-300:#cbd1ce; --color-slate-400:#8a9490;
+  --color-slate-500:#66706c; --color-slate-600:#4f5855; --color-slate-700:#3f4643; --color-slate-800:#2b3230; --color-slate-900:#1e2422; --color-slate-950:#131817;
+
+  --color-rose-50:#fdf4f3; --color-rose-100:#fae6e4; --color-rose-200:#f4cdc9; --color-rose-300:#ebaaa4; --color-rose-400:#de827a;
+  --color-rose-500:#cf6258; --color-rose-600:#b94f46; --color-rose-700:#9a423b; --color-rose-800:#7e3a35; --color-rose-900:#69342f; --color-rose-950:#381815;
+
+  --color-amber-50:#fbf7ee; --color-amber-100:#f6ecd5; --color-amber-200:#eddaa9; --color-amber-300:#e2c378; --color-amber-400:#d6aa4f;
+  --color-amber-500:#c4903a; --color-amber-600:#a97530; --color-amber-700:#895c2b; --color-amber-800:#704c28; --color-amber-900:#5d4024; --color-amber-950:#34200f;
+
+  --color-emerald-50:#f3f8f3; --color-emerald-100:#e2eee2; --color-emerald-200:#c6ddc7; --color-emerald-300:#9fc5a2; --color-emerald-400:#74a678;
+  --color-emerald-500:#538a58; --color-emerald-600:#41704a; --color-emerald-700:#365a3d; --color-emerald-800:#2e4932; --color-emerald-900:#273d2b; --color-emerald-950:#12211a;
+
+  --color-sky-50:#f3f7fa; --color-sky-100:#e3edf4; --color-sky-200:#c8dbe8; --color-sky-300:#a0c1d6; --color-sky-400:#74a1be;
+  --color-sky-500:#5584a6; --color-sky-600:#426a8a; --color-sky-700:#375671; --color-sky-800:#31485e; --color-sky-900:#2c3e50; --color-sky-950:#1a2530;
+
+  --color-indigo-50:#f5f5fa; --color-indigo-100:#e8e8f4; --color-indigo-200:#d2d2e8; --color-indigo-300:#b3b3d6; --color-indigo-400:#9090c0;
+  --color-indigo-500:#7373a8; --color-indigo-600:#5c5c8c; --color-indigo-700:#4b4b72; --color-indigo-800:#3e3e5e; --color-indigo-900:#343450; --color-indigo-950:#1d1d30;
+
+  /* Bayangan lebih halus dan menyebar */
+  --shadow-xs:0 1px 2px 0 rgb(40 55 50 / .04);
+  --shadow-sm:0 2px 8px -2px rgb(40 55 50 / .07);
+  --shadow-md:0 6px 16px -4px rgb(40 55 50 / .09);
+  --shadow-lg:0 12px 28px -8px rgb(40 55 50 / .11);
+  --shadow-xl:0 20px 40px -12px rgb(40 55 50 / .13);
+  --shadow-2xl:0 28px 56px -16px rgb(40 55 50 / .18);
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
@@ -42,3 +74,40 @@ button:not(:disabled):active { transform: scale(.97); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0s !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Halaman daftar mengisi tinggi layar penuh */
+.fill-page { min-height: calc(100vh - 8.5rem); display: flex; flex-direction: column; }
+.fill-card { flex: 1 1 auto; }
+
+/* ---------- Interaksi tambahan ---------- */
+@keyframes fr-toast { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes fr-row { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+@keyframes fr-pulse-soft { 0%,100% { box-shadow: 0 0 0 0 rgb(185 79 70 / .35); } 50% { box-shadow: 0 0 0 5px rgb(185 79 70 / 0); } }
+@keyframes fr-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+tbody tr { animation: fr-row .4s cubic-bezier(.22,1,.36,1) both; }
+tbody tr:nth-child(2) { animation-delay: .04s; } tbody tr:nth-child(3) { animation-delay: .08s; }
+tbody tr:nth-child(4) { animation-delay: .12s; } tbody tr:nth-child(5) { animation-delay: .16s; }
+tbody tr:nth-child(n+6) { animation-delay: .2s; }
+tbody tr { transition: background-color .2s ease; }
+
+/* Kartu di dalam grid terangkat halus saat disorot */
+.anim-page .grid > div[class*="rounded-2xl"]:not([class*="overflow-hidden"]),
+.anim-page .grid > button[class*="rounded-2xl"] { transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.anim-page .grid > div[class*="rounded-2xl"]:not([class*="overflow-hidden"]):hover,
+.anim-page .grid > button[class*="rounded-2xl"]:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+/* Item daftar (laporan, fasilitas) bergeser tipis saat disorot */
+.anim-page button[class*="rounded-xl"][class*="border"]:not(:disabled):hover,
+.anim-page button[class*="rounded-2xl"][class*="border"]:not(:disabled):hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+
+/* Sidebar: ikon bergerak sedikit */
+aside button svg, aside button span { transition: transform .2s ease; }
+aside button:hover svg { transform: scale(1.12); }
+aside button:hover span { transform: translateX(2px); }
+
+/* Lencana "Terlambat" berdenyut lembut agar terlihat */
+[class*="animate-pulse"] { animation-duration: 2.4s; }
+.fr-pulse { animation: fr-pulse-soft 2.2s ease-in-out infinite; }
+.fr-float { animation: fr-float 4s ease-in-out infinite; }
+.anim-toast { animation: fr-toast .35s cubic-bezier(.22,1,.36,1) both; }

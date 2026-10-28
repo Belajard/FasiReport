@@ -1,4 +1,6 @@
 import "dotenv/config";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -19,7 +21,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || "dev-only-secret-change-me-please-0000",
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || "12h",
   corsOrigin: (process.env.CORS_ORIGIN || "http://localhost:3000").split(",").map((s) => s.trim()),
-  uploadDir: process.env.UPLOAD_DIR || new URL("./uploads", import.meta.url).pathname,
+  // Hanya untuk foto lama (versi sebelumnya); foto baru disimpan di database
+  uploadDir: path.resolve(process.env.UPLOAD_DIR || fileURLToPath(new URL("./uploads", import.meta.url))),
   maxUploadMb: Number(process.env.MAX_UPLOAD_MB || 5),
   // Batas waktu penanganan (SLA) dalam jam, dihitung sejak laporan ditugaskan
   slaHours: { high: 24, medium: 72, low: 168 },

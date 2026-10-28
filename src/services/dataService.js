@@ -136,6 +136,8 @@ class DataService {
 
   clearSession() {
     this.stop();
+    this.generation = (this.generation || 0) + 1; // batalkan refresh milik sesi lama
+    this.refreshing = null;
     safeLocalStorage.removeItem(TOKEN_KEY);
     safeLocalStorage.removeItem(USER_KEY);
     this.cache = this.emptyCache();
@@ -170,7 +172,8 @@ class DataService {
     if (this.refreshing) return this.refreshing;
     const user = this.getCurrentUser();
     if (!user) return Promise.resolve();
-    this.refreshing = (async () => {
+    const gen = this.generation || 0;
+    const job = (async () => {
       const jobs = [
         this.request("GET", "/reports"),
         this.request("GET", "/facilities"),
@@ -184,6 +187,7 @@ class DataService {
         jobs.push(this.request("GET", "/vendors"));
       }
       const [reports, facilities, maint, stats, notif, extra1, extra2] = await Promise.all(jobs);
+      if (gen !== (this.generation || 0)) return; // sesi sudah berganti: buang hasil lama
       this.cache.reports = reports.data;
       this.cache.facilities = facilities.data;
       this.cache.schedules = maint.data.map((m) => ({ ...m, date: formatDateId(m.date_iso) }));
@@ -198,9 +202,10 @@ class DataService {
       }
       this.emit("refresh");
     })().finally(() => {
-      this.refreshing = null;
+      if (this.refreshing === job) this.refreshing = null;
     });
-    return this.refreshing;
+    this.refreshing = job;
+    return job;
   }
 
   /** Setelah perubahan data: ambil ulang dari server lalu beri tahu semua komponen. */

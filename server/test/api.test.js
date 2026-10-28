@@ -134,3 +134,25 @@ test("validasi input & statistik", async () => {
   assert.ok(Array.isArray(s.trend));
   assert.equal((await call("GET", "/audit", adm)).status, 200);
 });
+
+test("upload foto: tersimpan di database, bisa diambil kembali, format lain ditolak", async () => {
+  const emp = await login("karyawan.test@example.com", "employee");
+  // PNG 1x1 valid
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+  const send = (type, buf, token = emp) => {
+    const fd = new FormData();
+    fd.append("file", new Blob([buf], { type }), "x");
+    return fetch(base + "/uploads", { method: "POST", headers: token ? { Authorization: `Bearer ${token}` } : {}, body: fd });
+  };
+  const ok = await send("image/png", png);
+  assert.equal(ok.status, 201);
+  const { url } = await ok.json();
+  assert.match(url, /^\/api\/uploads\/[0-9a-f-]{36}$/);
+  const got = await fetch(base.replace("/api", "") + url);
+  assert.equal(got.status, 200);
+  assert.equal(got.headers.get("content-type"), "image/png");
+  assert.equal(Buffer.from(await got.arrayBuffer()).length, png.length);
+  assert.equal((await send("text/plain", Buffer.from("x"))).status, 400);
+  assert.equal((await send("image/png", png, null)).status, 401);
+  assert.equal((await fetch(base + "/uploads/bukan-uuid")).status, 404);
+});

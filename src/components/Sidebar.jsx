@@ -42,7 +42,7 @@ export const Sidebar = ({
       if (before) before();
       handleNavClick(tab);
     }}
-    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === tab ? "bg-teal-700 text-white shadow-xs" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
+    className={`w-full flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${currentTab === tab ? "bg-teal-700 text-white shadow-xs [&_svg]:text-white" : "text-slate-600 dark:text-slate-300 hover:bg-teal-50/60 dark:hover:bg-slate-800/80 hover:text-teal-800 dark:hover:text-teal-300"}`}
   >
       {icon}
       <span>{label}</span>

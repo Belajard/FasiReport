@@ -117,7 +117,7 @@ export const TechnicianView = ({ currentTab, onSelectTab, focusReportId, onFocus
 
   return <div className="space-y-6">
       {currentTab === "dashboard" && <div className="space-y-6">
-          <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30">
+          <div className="bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-200 text-[11px] font-bold tracking-wider uppercase mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-teal-300" />DASHBOARD TEKNISI
@@ -176,13 +176,13 @@ export const TechnicianView = ({ currentTab, onSelectTab, focusReportId, onFocus
           </div>
         </div>}
 
-      {(currentTab === "my-tasks" || currentTab === "task-history") && <div className="space-y-4">
+      {(currentTab === "my-tasks" || currentTab === "task-history") && <div className="space-y-4 fill-page">
           <SectionHeader
     eyebrow={currentTab === "my-tasks" ? "TUGAS SAYA" : "RIWAYAT"}
     title={currentTab === "my-tasks" ? "Tugas Perbaikan Saya" : "Riwayat Perbaikan"}
     subtitle={currentTab === "my-tasks" ? "Diurutkan berdasarkan keterlambatan dan prioritas." : "Perbaikan yang sudah Anda kirim, termasuk hasil konfirmasi pelapor."}
   />
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
+          <div className="fill-card bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden">
             <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-slate-200 dark:border-slate-800">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />

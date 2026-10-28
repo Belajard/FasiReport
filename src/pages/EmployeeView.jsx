@@ -167,7 +167,7 @@ export const EmployeeView = ({
           {
     /* Top Greeting Banner */
   }
-          <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30">
+          <div className="bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-200 text-[11px] font-bold tracking-wider uppercase mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-teal-300" />
@@ -511,7 +511,7 @@ export const EmployeeView = ({
     /* 2. DEDICATED BUAT LAPORAN PAGE */
   }
       {currentTab === "create-report" && <div className="max-w-3xl mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
-          <div className="bg-gradient-to-r from-teal-800 to-teal-700 text-white p-6">
+          <div className="bg-gradient-to-r from-teal-700 to-teal-500 text-white p-6">
             <div className="text-[10px] font-extrabold uppercase tracking-widest text-teal-200">
               FORMULIR PENGADUAN
             </div>
@@ -661,7 +661,7 @@ export const EmployeeView = ({
       {
     /* 3. MY REPORTS TAB VIEW */
   }
-      {currentTab === "my-reports" && <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
+      {currentTab === "my-reports" && <div className="fill-page fill-card bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
           <div className="p-6 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div>
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-teal-700 dark:text-teal-400">
@@ -957,7 +957,7 @@ export const EmployeeView = ({
           {
     /* Contact Box */
   }
-          <div className="bg-gradient-to-r from-teal-900 to-slate-900 text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-gradient-to-r from-teal-700 to-teal-500 text-white rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <div className="text-sm font-extrabold text-teal-300">Butuh Bantuan Mendesak?</div>
               <p className="text-xs text-slate-300 mt-0.5">

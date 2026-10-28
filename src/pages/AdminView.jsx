@@ -220,7 +220,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
           {
     /* Top Greeting Banner - Exactly matches Employee View styling and teal colors */
   }
-          <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30 transition-colors">
+          <div className="bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30 transition-colors">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-200 text-[11px] font-bold tracking-wider uppercase mb-2">
@@ -989,7 +989,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
       {
     /* 2. ALL REPORTS TAB VIEW */
   }
-      {currentTab === "all-reports" && <div className="space-y-4">
+      {currentTab === "all-reports" && <div className="space-y-4 fill-page">
           
           {
     /* Header */
@@ -1013,7 +1013,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
             </button>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
+          <div className="fill-card bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
             
             {
     /* Controls & Search Header */
@@ -1222,7 +1222,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
       {
     /* 3. FACILITIES TAB VIEW */
   }
-      {currentTab === "facilities" && <div className="space-y-4">
+      {currentTab === "facilities" && <div className="space-y-4 fill-page">
           
           {
     /* Header */
@@ -1249,7 +1249,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
             </button>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
+          <div className="fill-card bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
@@ -1338,7 +1338,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
           {
     /* Header Banner */
   }
-          <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-200 text-[11px] font-bold tracking-wider uppercase mb-2">
                 <CalendarDays className="w-3.5 h-3.5 text-teal-300" />
@@ -1564,7 +1564,7 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
           {
     /* Header Banner */
   }
-          <div className="bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30">
+          <div className="bg-gradient-to-r from-teal-700 via-teal-600 to-teal-500 text-white rounded-3xl p-6 sm:p-8 shadow-sm border border-teal-700/30">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-200 text-[11px] font-bold tracking-wider uppercase mb-2">
               <BookOpenCheck className="w-3.5 h-3.5 text-teal-300" />
               TATA KELOLA & OPERASIONAL

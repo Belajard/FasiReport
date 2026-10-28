@@ -161,3 +161,16 @@ ALTER TABLE comments              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE maintenance_schedules ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs            ENABLE ROW LEVEL SECURITY;
+
+-- Foto lampiran disimpan di database (bukan di folder server) agar tidak bergantung pada
+-- sistem berkas/OS dan tetap ada saat server dipindah atau di-deploy ke hosting cloud.
+CREATE TABLE IF NOT EXISTS uploads (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  mime       VARCHAR(40) NOT NULL,
+  size       INTEGER NOT NULL,
+  data       BYTEA NOT NULL,
+  user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_uploads_user ON uploads(user_id);
+ALTER TABLE uploads ENABLE ROW LEVEL SECURITY;

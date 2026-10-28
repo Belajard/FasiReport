@@ -89,6 +89,7 @@ Untuk menghubungkan server:
 3. `npm run build && npm start` — data kini tersimpan di Supabase.
 
 RLS aktif tanpa policy: tabel hanya dapat diakses lewat server API, bukan lewat API publik Supabase.
+Foto lampiran disimpan di tabel `uploads` (PostgreSQL), bukan di folder server, jadi tidak ada folder yang perlu dibuat dan aman di Windows/macOS/Linux maupun hosting cloud.
 Akun demo memakai password `password123`; ubah atau nonaktifkan sebelum dipakai di luar demo.
 
 ## Keamanan
