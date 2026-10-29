@@ -36,7 +36,8 @@ export const NotificationBell = ({ onOpenReport }) => {
     if (n.report_id && onOpenReport) onOpenReport(n.report_id);
   };
 
-  return <div className="relative" ref={ref}>
+  // Di HP, wadah tidak "relative" sehingga panel menempel ke header (selebar layar); mulai layar sm panel menempel ke lonceng.
+  return <div className="sm:relative" ref={ref}>
       <button
     onClick={() => setOpen(!open)}
     aria-label="Notifikasi"
@@ -49,14 +50,14 @@ export const NotificationBell = ({ onOpenReport }) => {
           </span>}
       </button>
 
-      {open && <div className="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-30 overflow-hidden">
+      {open && <div className="absolute left-3 right-3 top-full mt-2 sm:left-auto sm:right-0 sm:top-auto sm:w-96 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-30 overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
             <span className="text-xs font-extrabold text-slate-900 dark:text-white">Notifikasi</span>
             {state.unread > 0 && <button onClick={() => dataService.markAllNotificationsRead()} className="text-[11px] font-bold text-teal-700 dark:text-teal-400 flex items-center gap-1 hover:underline">
                 <CheckCheck className="w-3 h-3" />Tandai semua dibaca
               </button>}
           </div>
-          <div className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+          <div className="max-h-[60vh] sm:max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
             {state.items.length === 0 && <p className="p-6 text-center text-xs text-slate-400">Belum ada notifikasi.</p>}
             {state.items.map((n) => <button
     key={n.id}
