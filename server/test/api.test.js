@@ -156,3 +156,26 @@ test("upload foto: tersimpan di database, bisa diambil kembali, format lain dito
   assert.equal((await send("image/png", png, null)).status, 401);
   assert.equal((await fetch(base + "/uploads/bukan-uuid")).status, 404);
 });
+
+test("hapus laporan: karyawan hanya yang belum diproses, admin boleh semua status + tercatat di audit", async () => {
+  const emp = await login("karyawan.test@example.com", "employee");
+  const emp2 = await login("karyawan2.test@example.com", "employee");
+  const adm = await login("admin.test@example.com", "admin");
+  const tech = await login("teknisi.test@example.com", "technician");
+  const mk = async () => (await call("POST", "/reports", emp, { facility_id: 1, description: "Tes hapus: laporan uji coba dihapus.", priority: "low" })).body.data.id;
+
+  const a = await mk();
+  assert.equal((await call("DELETE", `/reports/${a}`, emp2)).status, 404); // bukan pemiliknya
+  assert.equal((await call("DELETE", `/reports/${a}`, tech)).status, 403);  // teknisi tidak boleh
+
+  // laporan sudah diproses: karyawan ditolak, admin berhasil
+  const techUser = (await call("GET", "/users/technicians", adm)).body.data.find((t) => t.email === "teknisi.test@example.com");
+  await call("POST", `/reports/${a}/transition`, adm, { action: "assign", technician_id: techUser.id });
+  await call("POST", `/reports/${a}/transition`, tech, { action: "start" });
+  assert.equal((await call("DELETE", `/reports/${a}`, emp)).status, 409);
+  assert.equal((await call("DELETE", `/reports/${a}`, adm)).status, 200);
+  assert.equal((await call("GET", `/reports/${a}`, adm)).status, 404);
+
+  const log = (await call("GET", "/audit", adm)).body.data;
+  assert.ok(log.some((l) => l.action === "delete" && l.entity === "report" && l.entity_id === a));
+});

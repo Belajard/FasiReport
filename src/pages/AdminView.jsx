@@ -14,6 +14,7 @@ import { AdminInsights } from "../components/AdminInsights";
 import { DirectoryPage } from "./DirectoryPage";
 import { UsersPage } from "./UsersPage";
 import { AuditPage } from "./AuditPage";
+import { ModalShell } from "../components/ui";
 import { ReportDateFilter, inDateRange } from "../components/ReportDateFilter";
 import {
   Plus,
@@ -74,6 +75,22 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
   const [maintenanceStatusFilter, setMaintenanceStatusFilter] = useState("all");
   const [maintenanceModalOpen, setMaintenanceModalOpen] = useState(false);
   const [maintenanceToEdit, setMaintenanceToEdit] = useState(null);
+  const [reportToDelete, setReportToDelete] = useState(null);
+  const [isDeletingReport, setIsDeletingReport] = useState(false);
+  const confirmDeleteReport = async () => {
+    if (!reportToDelete) return;
+    try {
+      setIsDeletingReport(true);
+      await dataService.deleteReport(reportToDelete.id);
+      showToast(`Laporan #${reportToDelete.id} berhasil dihapus permanen.`, "success");
+      setReportToDelete(null);
+      loadData();
+    } catch (err) {
+      showToast(err.message || "Gagal menghapus laporan.", "error");
+    } finally {
+      setIsDeletingReport(false);
+    }
+  };
   const loadData = () => {
     if (!user) return;
     const allReports = dataService.getReports(user);
@@ -1208,6 +1225,14 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
                               <Eye className="w-3.5 h-3.5" />
                               <span>{rep.status === "reported" ? "Verifikasi" : "Tindak Lanjut"}</span>
                             </button>
+                            <button
+      onClick={() => setReportToDelete(rep)}
+      className="ml-2 p-1.5 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-900 align-middle"
+      title={`Hapus laporan #${rep.id}`}
+      aria-label={`Hapus laporan #${rep.id}`}
+    >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                           </td>
                         </tr>;
   })}
@@ -1756,6 +1781,23 @@ export const AdminView = ({ currentTab, onSelectTab, focusReportId, onFocusHandl
     itemToEdit={maintenanceToEdit}
     facilities={facilities}
   />}
+
+      {reportToDelete && <ModalShell title="Hapus Laporan Permanen" subtitle={`Laporan #${reportToDelete.id} — ${reportToDelete.facility?.name || ""}`} onClose={() => !isDeletingReport && setReportToDelete(null)} maxW="max-w-md">
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-3.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl text-xs text-rose-800 dark:text-rose-200">
+              <Trash2 className="w-4 h-4 shrink-0 mt-0.5" />
+              <div>
+                Laporan berstatus <strong>{({ reported: "Dilaporkan", assigned: "Ditugaskan", processing: "Diproses", repaired: "Diperbaiki", completed: "Selesai", rejected: "Ditolak" })[reportToDelete.status] || reportToDelete.status}</strong> dari <strong>{reportToDelete.user?.name}</strong> beserta riwayat, komentar, bahan, dan fotonya akan dihapus permanen dan tidak dapat dikembalikan. Tindakan ini tercatat di Log Aktivitas.
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button disabled={isDeletingReport} onClick={() => setReportToDelete(null)} className="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">Batal</button>
+              <button disabled={isDeletingReport} onClick={confirmDeleteReport} className="px-4 py-2 text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm flex items-center gap-1.5 disabled:opacity-60 transition-colors">
+                <Trash2 className="w-3.5 h-3.5" />{isDeletingReport ? "Menghapus..." : "Ya, Hapus Permanen"}
+              </button>
+            </div>
+          </div>
+        </ModalShell>}
 
     </div>;
 };

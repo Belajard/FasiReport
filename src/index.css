@@ -1,35 +1,28 @@
 @import "tailwindcss";
 
-/* ---------- Palet lembut (soft): sage, pasir, koral, biru kabut ---------- */
+/* ---------- Palet hangat & hidup: teal laut, krem pasir, aksen status jelas ---------- */
 @theme {
-  --color-teal-50:#f4f8f6; --color-teal-100:#e5efeb; --color-teal-200:#cddfd8; --color-teal-300:#aac8bd; --color-teal-400:#84ab9d;
-  --color-teal-500:#6a9486; --color-teal-600:#55806f; --color-teal-700:#46695c; --color-teal-800:#3a554b; --color-teal-900:#30443d; --color-teal-950:#1b2823;
+  --color-teal-50:#eaf7f3; --color-teal-100:#cfeee5; --color-teal-200:#a2ddcc; --color-teal-300:#6fc6ae; --color-teal-400:#3fae92; --color-teal-500:#2a9479; --color-teal-600:#1f7a64; --color-teal-700:#1a6552; --color-teal-800:#175142; --color-teal-900:#144237; --color-teal-950:#0a2620;
 
-  --color-slate-50:#f7f8f7; --color-slate-100:#eef0ef; --color-slate-200:#e1e5e3; --color-slate-300:#cbd1ce; --color-slate-400:#8a9490;
-  --color-slate-500:#66706c; --color-slate-600:#4f5855; --color-slate-700:#3f4643; --color-slate-800:#2b3230; --color-slate-900:#1e2422; --color-slate-950:#131817;
+  --color-slate-50:#f4f2ee; --color-slate-100:#ebe8e2; --color-slate-200:#dcd8d0; --color-slate-300:#c3beb4; --color-slate-400:#8f897d; --color-slate-500:#6b6559; --color-slate-600:#524d43; --color-slate-700:#3f3b33; --color-slate-800:#2a2722; --color-slate-900:#1c1a17; --color-slate-950:#11100e;
 
-  --color-rose-50:#fdf4f3; --color-rose-100:#fae6e4; --color-rose-200:#f4cdc9; --color-rose-300:#ebaaa4; --color-rose-400:#de827a;
-  --color-rose-500:#cf6258; --color-rose-600:#b94f46; --color-rose-700:#9a423b; --color-rose-800:#7e3a35; --color-rose-900:#69342f; --color-rose-950:#381815;
+  --color-rose-50:#fff1ef; --color-rose-100:#ffe0db; --color-rose-200:#ffc4bb; --color-rose-300:#ff9d90; --color-rose-400:#f56f5e; --color-rose-500:#e5513f; --color-rose-600:#cc3f2f; --color-rose-700:#a93226; --color-rose-800:#8a2e25; --color-rose-900:#712b24; --color-rose-950:#3d130f;
 
-  --color-amber-50:#fbf7ee; --color-amber-100:#f6ecd5; --color-amber-200:#eddaa9; --color-amber-300:#e2c378; --color-amber-400:#d6aa4f;
-  --color-amber-500:#c4903a; --color-amber-600:#a97530; --color-amber-700:#895c2b; --color-amber-800:#704c28; --color-amber-900:#5d4024; --color-amber-950:#34200f;
+  --color-amber-50:#fff8e6; --color-amber-100:#ffefc2; --color-amber-200:#ffe08a; --color-amber-300:#ffcd4d; --color-amber-400:#f5b324; --color-amber-500:#e09a0e; --color-amber-600:#bf7a09; --color-amber-700:#96600c; --color-amber-800:#7a4d10; --color-amber-900:#66400f; --color-amber-950:#3a2106;
 
-  --color-emerald-50:#f3f8f3; --color-emerald-100:#e2eee2; --color-emerald-200:#c6ddc7; --color-emerald-300:#9fc5a2; --color-emerald-400:#74a678;
-  --color-emerald-500:#538a58; --color-emerald-600:#41704a; --color-emerald-700:#365a3d; --color-emerald-800:#2e4932; --color-emerald-900:#273d2b; --color-emerald-950:#12211a;
+  --color-emerald-50:#ecf8f0; --color-emerald-100:#d3f0de; --color-emerald-200:#a9e2bf; --color-emerald-300:#76cf9a; --color-emerald-400:#45b877; --color-emerald-500:#2a9d5f; --color-emerald-600:#1f8450; --color-emerald-700:#1b6a42; --color-emerald-800:#195538; --color-emerald-900:#164730; --color-emerald-950:#0a2a1b;
 
-  --color-sky-50:#f3f7fa; --color-sky-100:#e3edf4; --color-sky-200:#c8dbe8; --color-sky-300:#a0c1d6; --color-sky-400:#74a1be;
-  --color-sky-500:#5584a6; --color-sky-600:#426a8a; --color-sky-700:#375671; --color-sky-800:#31485e; --color-sky-900:#2c3e50; --color-sky-950:#1a2530;
+  --color-sky-50:#eaf5fd; --color-sky-100:#d2e9fa; --color-sky-200:#a8d4f4; --color-sky-300:#72b9ec; --color-sky-400:#3f9ae0; --color-sky-500:#2580cb; --color-sky-600:#1b66ab; --color-sky-700:#195289; --color-sky-800:#194571; --color-sky-900:#183b5d; --color-sky-950:#0e2338;
 
-  --color-indigo-50:#f5f5fa; --color-indigo-100:#e8e8f4; --color-indigo-200:#d2d2e8; --color-indigo-300:#b3b3d6; --color-indigo-400:#9090c0;
-  --color-indigo-500:#7373a8; --color-indigo-600:#5c5c8c; --color-indigo-700:#4b4b72; --color-indigo-800:#3e3e5e; --color-indigo-900:#343450; --color-indigo-950:#1d1d30;
+  --color-indigo-50:#f0f0ff; --color-indigo-100:#e2e2fe; --color-indigo-200:#c9c9fc; --color-indigo-300:#a7a5f8; --color-indigo-400:#8480f1; --color-indigo-500:#6a63e6; --color-indigo-600:#574dd0; --color-indigo-700:#473fb0; --color-indigo-800:#3b358f; --color-indigo-900:#342f73; --color-indigo-950:#1f1c45;
 
   /* Bayangan lebih halus dan menyebar */
-  --shadow-xs:0 1px 2px 0 rgb(40 55 50 / .04);
-  --shadow-sm:0 2px 8px -2px rgb(40 55 50 / .07);
-  --shadow-md:0 6px 16px -4px rgb(40 55 50 / .09);
-  --shadow-lg:0 12px 28px -8px rgb(40 55 50 / .11);
-  --shadow-xl:0 20px 40px -12px rgb(40 55 50 / .13);
-  --shadow-2xl:0 28px 56px -16px rgb(40 55 50 / .18);
+  --shadow-xs:0 1px 2px 0 rgb(60 50 35 / .04);
+  --shadow-sm:0 2px 8px -2px rgb(60 50 35 / .07);
+  --shadow-md:0 6px 16px -4px rgb(60 50 35 / .09);
+  --shadow-lg:0 12px 28px -8px rgb(60 50 35 / .11);
+  --shadow-xl:0 20px 40px -12px rgb(60 50 35 / .13);
+  --shadow-2xl:0 28px 56px -16px rgb(60 50 35 / .18);
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -82,7 +75,7 @@ button:not(:disabled):active { transform: scale(.97); }
 /* ---------- Interaksi tambahan ---------- */
 @keyframes fr-toast { from { opacity: 0; transform: translateY(14px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes fr-row { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
-@keyframes fr-pulse-soft { 0%,100% { box-shadow: 0 0 0 0 rgb(185 79 70 / .35); } 50% { box-shadow: 0 0 0 5px rgb(185 79 70 / 0); } }
+@keyframes fr-pulse-soft { 0%,100% { box-shadow: 0 0 0 0 rgb(204 63 47 / .38); } 50% { box-shadow: 0 0 0 5px rgb(204 63 47 / 0); } }
 @keyframes fr-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 
 tbody tr { animation: fr-row .4s cubic-bezier(.22,1,.36,1) backwards; }
@@ -111,3 +104,33 @@ aside button:hover span { transform: translateX(2px); }
 .fr-pulse { animation: fr-pulse-soft 2.2s ease-in-out infinite; }
 .fr-float { animation: fr-float 4s ease-in-out infinite; }
 .anim-toast { animation: fr-toast .35s cubic-bezier(.22,1,.36,1) both; }
+
+/* ---------- Gerak tambahan ---------- */
+@keyframes fr-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes fr-ring { 0%,100% { transform: rotate(0); } 15% { transform: rotate(14deg); } 30% { transform: rotate(-12deg); } 45% { transform: rotate(8deg); } 60% { transform: rotate(-5deg); } 75% { transform: rotate(0); } }
+@keyframes fr-shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+
+/* Bar progres/persentase tumbuh dari kiri */
+[class*="rounded-full"][style*="width"] { transform-origin: left center; animation: fr-grow .9s cubic-bezier(.22,1,.36,1) backwards; }
+
+/* Daftar bersarang muncul berurutan */
+.anim-page .space-y-2 > *, .anim-page .space-y-3 > * { animation: fr-fade-up .45s cubic-bezier(.22,1,.36,1) backwards; }
+.anim-page :is(.space-y-2,.space-y-3) > *:nth-child(2) { animation-delay: .05s; }
+.anim-page :is(.space-y-2,.space-y-3) > *:nth-child(3) { animation-delay: .1s; }
+.anim-page :is(.space-y-2,.space-y-3) > *:nth-child(4) { animation-delay: .15s; }
+.anim-page :is(.space-y-2,.space-y-3) > *:nth-child(5) { animation-delay: .2s; }
+.anim-page :is(.space-y-2,.space-y-3) > *:nth-child(n+6) { animation-delay: .25s; }
+
+/* Tombol utama: sorotan cahaya halus saat disorot */
+button[class*="bg-teal-700"]:not(:disabled):hover, button[class*="bg-teal-600"]:not(:disabled):hover { box-shadow: 0 8px 18px -6px rgb(31 122 100 / .55); transform: translateY(-1px); }
+button[class*="bg-teal-700"]:not(:disabled):active, button[class*="bg-teal-600"]:not(:disabled):active { transform: translateY(0) scale(.98); }
+
+/* Lonceng notifikasi bergoyang saat ada yang belum dibaca */
+.fr-ring svg { transform-origin: 50% 0; animation: fr-ring 2.4s ease-in-out 1s infinite; }
+
+/* Fokus keyboard jelas */
+:focus-visible { outline: 2px solid var(--color-teal-500); outline-offset: 2px; }
+input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; }
+
+/* Kerangka muat (skeleton) */
+.fr-skeleton { background: linear-gradient(90deg, var(--color-slate-100) 25%, var(--color-slate-200) 50%, var(--color-slate-100) 75%); background-size: 200% 100%; animation: fr-shimmer 1.4s linear infinite; border-radius: .75rem; }

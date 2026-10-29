@@ -104,10 +104,23 @@ router.delete("/:id(\\d+)", requireRole("employee", "admin"), asyncHandler(async
   await withTransaction(async (c) => {
     const cur = (await c.query(`SELECT * FROM reports WHERE id=$1 FOR UPDATE`, [id])).rows[0];
     if (!cur || (req.user.role === "employee" && cur.user_id !== req.user.id)) throw notFound("Laporan tidak ditemukan.");
-    const deletable = req.user.role === "admin" ? ["reported", "rejected"] : ["reported"];
-    if (!deletable.includes(cur.status)) throw conflict("Laporan tidak dapat dihapus karena sudah dalam proses penanganan.");
-    await c.query(`DELETE FROM reports WHERE id=$1`, [id]);
-    await audit(c, req.user.id, "delete", "report", id);
+    // Karyawan hanya boleh menghapus laporannya yang belum diproses; admin boleh menghapus laporan berstatus apa pun
+    if (req.user.role === "employee" && cur.status !== "reported") {
+      throw conflict("Laporan tidak dapat dihapus karena sudah dalam proses penanganan.");
+    }
+    // Kumpulkan foto yang hanya dipakai laporan ini agar tidak menjadi data yatim di tabel uploads
+    const hist = (await c.query(`SELECT photo FROM report_histories WHERE report_id=$1`, [id])).rows;
+    const photoIds = [cur.photo, cur.after_photo, ...hist.map((h) => h.photo)]
+      .map((u) => /^\/api\/uploads\/([0-9a-f-]{36})$/i.exec(u || "")?.[1])
+      .filter(Boolean);
+    await c.query(`DELETE FROM reports WHERE id=$1`, [id]); // riwayat, bahan, komentar, notifikasi ikut terhapus (CASCADE)
+    if (photoIds.length) await c.query(`DELETE FROM uploads WHERE id = ANY($1::uuid[])`, [photoIds]);
+    await audit(c, req.user.id, "delete", "report", id, {
+      status: cur.status,
+      facility_id: cur.facility_id,
+      description: String(cur.description).slice(0, 120),
+      photos_removed: photoIds.length,
+    });
   });
   res.json({ message: "Laporan dihapus." });
 }));

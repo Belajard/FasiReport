@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import App from './App.jsx';
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./index.css";
+import { initMotion } from "./motion.js";
 let isMounted = false;
 
 function renderApp() {
@@ -21,6 +22,7 @@ function renderApp() {
 }
 
 if (typeof document !== "undefined") {
+  initMotion();
   // 1. Eksekusi langsung jika elemen #root sudah siap di halaman
   renderApp();
 

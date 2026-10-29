@@ -329,6 +329,10 @@ export const ReportActions = ({ report, onChanged, onOpenEdit, onClose }) => {
             <Notice tone="amber">Perbaikan selesai dan menunggu konfirmasi pelapor. Jika pelapor tidak merespons, admin dapat menutup laporan.</Notice>
             <ReasonForm label="Tutup laporan sebagai admin" placeholder="Catatan penutupan (mis. sudah diverifikasi langsung di lokasi)..." buttonText="Tutup & Selesaikan" onSubmit={(t) => run("force_complete", { note: t }, "Laporan ditutup oleh admin.")} busy={busy} icon={CheckCircle} />
           </>}
+        {st !== "rejected" && <div className="pt-3 mt-1 border-t border-dashed border-rose-200 dark:border-rose-900/50 flex items-center justify-between gap-3">
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">Data salah atau uji coba? Admin dapat menghapus laporan ini secara permanen.</p>
+            {confirmDelete ? <button onClick={remove} disabled={busy} className={dangerBtn}><Trash2 className="w-3.5 h-3.5" />Ya, hapus permanen</button> : <button onClick={() => setConfirmDelete(true)} className={dangerBtn}><Trash2 className="w-3.5 h-3.5" />Hapus Laporan</button>}
+          </div>}
       </Panel>;
   }
 
