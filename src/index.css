@@ -2,9 +2,9 @@
 
 /* ---------- Palet hangat & hidup: teal laut, krem pasir, aksen status jelas ---------- */
 @theme {
-  --color-teal-50:#eaf7f3; --color-teal-100:#cfeee5; --color-teal-200:#a2ddcc; --color-teal-300:#6fc6ae; --color-teal-400:#3fae92; --color-teal-500:#2a9479; --color-teal-600:#1f7a64; --color-teal-700:#1a6552; --color-teal-800:#175142; --color-teal-900:#144237; --color-teal-950:#0a2620;
+  --color-teal-50:#e6faf4; --color-teal-100:#c3f2e4; --color-teal-200:#8ee6cf; --color-teal-300:#55d5b8; --color-teal-400:#22c0a1; --color-teal-500:#0fa88a; --color-teal-600:#0a9079; --color-teal-700:#08796a; --color-teal-800:#0a6156; --color-teal-900:#0b5047; --color-teal-950:#04302b;
 
-  --color-slate-50:#f4f2ee; --color-slate-100:#ebe8e2; --color-slate-200:#dcd8d0; --color-slate-300:#c3beb4; --color-slate-400:#8f897d; --color-slate-500:#6b6559; --color-slate-600:#524d43; --color-slate-700:#3f3b33; --color-slate-800:#2a2722; --color-slate-900:#1c1a17; --color-slate-950:#11100e;
+  --color-slate-50:#fcfbf8; --color-slate-100:#f5f3ee; --color-slate-200:#e8e5dc; --color-slate-300:#d2cdbf; --color-slate-400:#9a9486; --color-slate-500:#6b6559; --color-slate-600:#524d43; --color-slate-700:#3f3b33; --color-slate-800:#2a2722; --color-slate-900:#1c1a17; --color-slate-950:#11100e;
 
   --color-rose-50:#fff1ef; --color-rose-100:#ffe0db; --color-rose-200:#ffc4bb; --color-rose-300:#ff9d90; --color-rose-400:#f56f5e; --color-rose-500:#e5513f; --color-rose-600:#cc3f2f; --color-rose-700:#a93226; --color-rose-800:#8a2e25; --color-rose-900:#712b24; --color-rose-950:#3d130f;
 
@@ -134,3 +134,52 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
 
 /* Kerangka muat (skeleton) */
 .fr-skeleton { background: linear-gradient(90deg, var(--color-slate-100) 25%, var(--color-slate-200) 50%, var(--color-slate-100) 75%); background-size: 200% 100%; animation: fr-shimmer 1.4s linear infinite; border-radius: .75rem; }
+
+/* ================= Gerak & kecerahan tambahan ================= */
+@keyframes fr-gradient { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+@keyframes fr-drift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-24px,18px) scale(1.12); } }
+@keyframes fr-route { 0% { width: 0; opacity: 1; } 70% { width: 100%; opacity: 1; } 100% { width: 100%; opacity: 0; } }
+@keyframes fr-burst { from { transform: translate(-50%,-50%) scale(.2); opacity: .55; } to { transform: translate(-50%,-50%) scale(1); opacity: 0; } }
+@keyframes fr-nudge { 0%,100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
+@keyframes fr-indicator { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+
+.fr-scroll { scrollbar-width: thin; scrollbar-color: var(--color-slate-300) transparent; }
+
+/* Banner hijau: gradasi bergeser perlahan + gelembung cahaya melayang */
+[class*="bg-gradient-to-r"][class*="from-teal"] { background-size: 220% 220%; position: relative; overflow: hidden; isolation: isolate;
+  animation: fr-fade-up .45s cubic-bezier(.22,1,.36,1) backwards, fr-gradient 16s ease-in-out infinite; }
+[class*="bg-gradient-to-r"][class*="from-teal"]::before, [class*="bg-gradient-to-r"][class*="from-teal"]::after { content: ""; position: absolute; border-radius: 9999px; pointer-events: none; z-index: -1; }
+[class*="bg-gradient-to-r"][class*="from-teal"]::before { width: 280px; height: 280px; right: -70px; top: -110px; background: radial-gradient(circle, rgb(255 255 255 / .30), transparent 68%); animation: fr-drift 9s ease-in-out infinite; }
+[class*="bg-gradient-to-r"][class*="from-teal"]::after { width: 220px; height: 220px; left: 38%; bottom: -130px; background: radial-gradient(circle, rgb(255 255 255 / .20), transparent 68%); animation: fr-drift 12s ease-in-out -4s infinite; }
+
+/* Bilah progres tipis saat berpindah halaman */
+.fr-route-bar { position: fixed; top: 0; left: 0; height: 3px; z-index: 70; pointer-events: none; background: linear-gradient(90deg, var(--color-teal-400), var(--color-amber-400), var(--color-rose-400)); border-radius: 0 3px 3px 0; animation: fr-route .9s cubic-bezier(.22,1,.36,1) forwards; }
+
+/* Cincin klik */
+.fr-burst { position: fixed; z-index: 80; width: 90px; height: 90px; border-radius: 9999px; pointer-events: none; border: 2px solid var(--color-teal-400); background: radial-gradient(circle, rgb(18 168 140 / .25), transparent 70%); animation: fr-burst .55s ease-out forwards; }
+
+/* Kartu muncul saat di-scroll */
+.fr-hide { opacity: 0; transform: translateY(26px) scale(.98); }
+.fr-hide.fr-in { opacity: 1; transform: none; transition: opacity .6s cubic-bezier(.22,1,.36,1), transform .6s cubic-bezier(.22,1,.36,1); }
+
+/* Sidebar: indikator di menu aktif + geser saat disorot */
+aside button { position: relative; }
+aside button[class*="bg-teal-700"]::before { content: ""; position: absolute; left: -14px; top: 22%; bottom: 22%; width: 4px; border-radius: 0 4px 4px 0; background: var(--color-teal-400); transform-origin: center; animation: fr-indicator .35s cubic-bezier(.22,1,.36,1) both; }
+
+/* Panah & ikon aksi bergeser saat tombol disorot */
+button svg, a svg { transition: transform .2s ease; }
+button:hover > svg.lucide-arrow-right, button:hover > svg.lucide-arrow-up-right, button:hover > svg.lucide-chevron-right, a:hover > svg.lucide-arrow-right { transform: translateX(4px); }
+button:hover > svg.lucide-plus { transform: rotate(90deg) scale(1.1); }
+button:hover > svg.lucide-trash-2 { transform: rotate(-10deg) scale(1.15); }
+button:hover > svg.lucide-pencil, button:hover > svg.lucide-eye { transform: scale(1.18); }
+
+/* Baris tabel: garis penanda di kiri saat disorot */
+tbody tr:hover { background-color: color-mix(in oklab, var(--color-teal-50) 70%, transparent); }
+tbody tr td:first-child { transition: box-shadow .2s ease; }
+tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--color-teal-500); }
+
+/* Kartu statistik: ikon bergoyang halus saat kartu disorot */
+.anim-page .grid > div:hover svg { animation: fr-nudge .6s ease; }
+
+/* Halaman login: gelembung warna melayang di latar */
+.fr-blob { position: absolute; border-radius: 9999px; filter: blur(48px); pointer-events: none; opacity: .55; animation: fr-drift 14s ease-in-out infinite; }

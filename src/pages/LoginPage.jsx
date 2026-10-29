@@ -39,8 +39,11 @@ export const LoginPage = () => {
       setIsLoading(false);
     }
   };
-  return <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 transition-colors">
-      <div className="w-full max-w-md anim-enter">
+  return <div className="relative overflow-hidden min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 transition-colors">
+      <div className="fr-blob w-72 h-72 bg-teal-300 -top-16 -left-16" />
+      <div className="fr-blob w-80 h-80 bg-amber-200 -bottom-20 -right-10" style={{ animationDelay: "-5s" }} />
+      <div className="fr-blob w-56 h-56 bg-sky-200 top-1/3 right-1/4" style={{ animationDelay: "-9s" }} />
+      <div className="relative z-10 w-full max-w-md anim-enter">
         
         {
     /* Brand Header */

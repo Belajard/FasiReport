@@ -83,6 +83,7 @@ const MainLayout = () => {
   />
 
         <main className="flex-1 p-5 sm:p-7 lg:p-8 max-w-7xl w-full mx-auto">
+          <div key={`bar-${currentTab}`} className="fr-route-bar" />
           <div key={currentTab} className="anim-page">
           {currentTab === "profile" ? <ProfilePage /> : user.role === "employee" ? <EmployeeView
     currentTab={currentTab}

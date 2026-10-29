@@ -52,8 +52,8 @@ export const Sidebar = ({
         {text}
       </div>
     </div>;
-  const navContent = <div className="flex flex-col justify-between h-full bg-white dark:bg-slate-900 transition-colors">
-      <div>
+  const navContent = <div className="flex flex-col h-full min-h-0 bg-white dark:bg-slate-900 transition-colors">
+      <div className="flex-1 min-h-0 overflow-y-auto fr-scroll pb-3">
         {
     /* Brand Logo with improved rich emerald/teal tone */
   }
@@ -145,7 +145,7 @@ export const Sidebar = ({
       {
     /* Logout at bottom */
   }
-      <div className="p-4 border-t border-slate-100 dark:border-slate-800">
+      <div className="p-4 border-t border-slate-100 dark:border-slate-800 shrink-0 bg-white dark:bg-slate-900">
         <button
     onClick={handleLogout}
     className="flex items-center gap-3 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50/80 dark:hover:bg-rose-950/30 transition-colors w-full px-3 py-2.5 rounded-xl"

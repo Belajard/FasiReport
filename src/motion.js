@@ -40,12 +40,42 @@ function animate(el) {
   requestAnimationFrame(tick);
 }
 
+function initBurst() {
+  document.addEventListener("pointerdown", (e) => {
+    const t = e.target.closest?.("button, a, [role=button]");
+    if (!t || t.disabled) return;
+    const ring = document.createElement("span");
+    ring.className = "fr-burst";
+    ring.style.left = `${e.clientX}px`;
+    ring.style.top = `${e.clientY}px`;
+    document.body.appendChild(ring);
+    setTimeout(() => ring.remove(), 600);
+  }, { passive: true });
+}
+
+let io;
+function reveal(root) {
+  if (!("IntersectionObserver" in window)) return;
+  io = io || new IntersectionObserver((entries) => {
+    for (const en of entries) if (en.isIntersecting) { en.target.classList.add("fr-in"); io.unobserve(en.target); }
+  }, { threshold: 0.08 });
+  const page = root.closest?.(".anim-page") || (root.matches?.(".anim-page") ? root : null) || root.querySelector?.(".anim-page");
+  if (!page) return;
+  page.querySelectorAll('[class*="rounded-2xl"],[class*="rounded-3xl"]').forEach((el) => {
+    if (el.parentElement === page || el.dataset.frSeen || el.closest("[class*='fixed']")) return;
+    el.dataset.frSeen = "1";
+    if (el.getBoundingClientRect().top > innerHeight + 20) { el.classList.add("fr-hide"); io.observe(el); }
+  });
+}
+
 export function initMotion() {
   if (typeof document === "undefined" || reduced()) return;
+  initBurst();
   const scan = (root) => {
     if (root.nodeType !== 1) return;
     if (root.matches?.(SEL)) animate(root);
     root.querySelectorAll?.(SEL).forEach(animate);
+    requestAnimationFrame(() => reveal(root));
   };
   new MutationObserver((muts) => {
     for (const m of muts) m.addedNodes.forEach(scan);

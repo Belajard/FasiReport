@@ -9,11 +9,20 @@ const TOKEN_KEY = "fasireport_token";
 const USER_KEY = "fasireport_user";
 const POLL_MS = 8000;
 
+// Sesi login disimpan di sessionStorage: berlaku selama tab/jendela terbuka (tetap login saat refresh),
+// tetapi hilang saat browser/tab ditutup sehingga membuka aplikasi lagi selalu meminta login.
+// Token lama di localStorage (versi sebelumnya) dibersihkan agar tidak auto-login.
+try {
+  window.localStorage.removeItem("fasireport_token");
+  window.localStorage.removeItem("fasireport_user");
+} catch {
+  /* storage tidak tersedia */
+}
 const memStore = {};
 export const safeLocalStorage = {
   getItem: (key) => {
     try {
-      const v = window.localStorage.getItem(key);
+      const v = window.sessionStorage.getItem(key);
       if (v !== null) return v;
     } catch {
       /* storage tidak tersedia */
@@ -22,7 +31,7 @@ export const safeLocalStorage = {
   },
   setItem: (key, value) => {
     try {
-      window.localStorage.setItem(key, value);
+      window.sessionStorage.setItem(key, value);
     } catch {
       /* abaikan */
     }
@@ -30,7 +39,7 @@ export const safeLocalStorage = {
   },
   removeItem: (key) => {
     try {
-      window.localStorage.removeItem(key);
+      window.sessionStorage.removeItem(key);
     } catch {
       /* abaikan */
     }
