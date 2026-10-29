@@ -92,6 +92,13 @@ RLS aktif tanpa policy: tabel hanya dapat diakses lewat server API, bukan lewat 
 Foto lampiran disimpan di tabel `uploads` (PostgreSQL), bukan di folder server, jadi tidak ada folder yang perlu dibuat dan aman di Windows/macOS/Linux maupun hosting cloud.
 Akun demo memakai password `password123`; ubah atau nonaktifkan sebelum dipakai di luar demo.
 
+## Hosting cPanel (Setup Node.js App)
+
+1. Node.js 20 atau lebih baru; **Application startup file: `app.cjs`** (bukan `server/index.js`, kalau tidak situs menjadi 503).
+2. Environment variables: `NODE_ENV=production`, `JWT_SECRET` (min. 24 karakter acak), `DATABASE_URL` (Supabase *Session pooler*), `CORS_ORIGIN`.
+3. Di terminal: `npm install && npm run build && npm run db:migrate`, lalu Restart aplikasi.
+4. Bila 503: lihat `stderr.log` di folder aplikasi atau jalankan `node app.cjs` di terminal; penyebab biasanya variabel di atas belum diisi.
+
 ## Keamanan
 
 - Kata sandi di-hash (bcrypt); sesi memakai JWT; akun nonaktif langsung ditolak.

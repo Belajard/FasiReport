@@ -43,9 +43,7 @@
     "autoprefixer": "^10.4.21",
     "concurrently": "^9.2.1",
     "tailwindcss": "^4.3.3",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "esbuild": "^0.25.0"
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.18.0"
